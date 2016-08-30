@@ -4,13 +4,11 @@
  * ###    Hang-o-Mat v. 2.5   ###   Copyright Jan Erdmann @ http://www.je0.de   ###
  * ################################################################################
  * @edit 2016-08-30 for Joomla 3.6.2 by ghsvs.de
- * @version 2016.08.30
+ * @version 2016.08.30-2
 */
 ?>
 <?php
 defined('_JEXEC') or die;
-
-use Joomla\Registry\Registry;
 
 #########################################
 ########## EINSTELLUNGEN START ##########
