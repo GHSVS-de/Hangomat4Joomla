@@ -95,7 +95,7 @@ $szge = JUri::root(true) . $szge;
 $dbprefix = trim($dbprefix) ? trim($dbprefix) : '#__';
 
 // Read POST and GET datas from forms and URL.
-$hmcook = trim($input->get('hmcook', ''));
+$hmcook = $input->get('hmcook', '', 'string');
 $hangowort = trim($input->get('hangowort', '', 'string'));
 $Hangodel = (int) $input->get('Hangodel');
 $Loesungswort = trim($input->get('Loesungswort', '', 'string'));
@@ -119,7 +119,7 @@ elseif (isset($_SERVER['HTTP_CLIENT_IP']))
 }
 
 // Check if admin is logged in and write into session.
-if (!empty($hmcook) && $hmcook == $adminpass)
+if (!empty($hmcook) && $hmcook === $adminpass)
 {
  $session->set('hangomat.hmcook', 1);
 }
@@ -599,6 +599,7 @@ function createHangomatTables($dbprefix)
  `C` int(10) NOT NULL DEFAULT '0',
  `D` int(10) NOT NULL DEFAULT '0',
  `E` int(10) NOT NULL DEFAULT '0',
+
  `F` int(10) NOT NULL DEFAULT '0',
  `G` int(10) NOT NULL DEFAULT '0',
  `H` int(10) NOT NULL DEFAULT '0',
