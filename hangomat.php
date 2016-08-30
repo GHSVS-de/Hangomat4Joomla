@@ -59,10 +59,10 @@ $szge = '/images/hangomat/';
 
 /**
 $adminpass string
- Hangomat-Administration. Sollte niemals zugleich DB-Passwort oder
+ Hangomat-Administrations-Kennwort. Sollte niemals zugleich DB-Passwort oder
  ähnlich gefährlich sein.
 */
-$adminpass = "kf1947";
+$adminpass = '';
 
 /**
 $loeanz integer
@@ -95,7 +95,7 @@ $szge = JUri::root(true) . $szge;
 $dbprefix = trim($dbprefix) ? trim($dbprefix) : '#__';
 
 // Read POST and GET datas from forms and URL.
-$hmcook = $input->get('hmcook', '');
+$hmcook = trim($input->get('hmcook', ''));
 $hangowort = trim($input->get('hangowort', '', 'string'));
 $Hangodel = (int) $input->get('Hangodel');
 $Loesungswort = trim($input->get('Loesungswort', '', 'string'));
@@ -119,7 +119,7 @@ elseif (isset($_SERVER['HTTP_CLIENT_IP']))
 }
 
 // Check if admin is logged in and write into session.
-if ($hmcook == $adminpass)
+if (!empty($hmcook) && $hmcook == $adminpass)
 {
  $session->set('hangomat.hmcook', 1);
 }
