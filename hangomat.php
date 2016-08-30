@@ -83,7 +83,7 @@ $FOOTER = '</table>';
 
 // Init some variables to avoid Warnings and Notices.
 $W1 = $W2 = array();
-$Text = $Text2 = $Text3 = $hmswort = $col = $jehmcookie = $Titel = $jetec_Ip = $stwort = '';
+$Text = $Text2 = $Text3 = $hmswort = $col = $Titel = $jetec_Ip = $stwort = '';
 
 // Init some variables/shortcuts.
 $heuteTag = date('l');
