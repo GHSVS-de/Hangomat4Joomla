@@ -4,7 +4,7 @@
  * ###    Hang-o-Mat v. 2.5   ###   Copyright Jan Erdmann @ http://www.je0.de   ###
  * ################################################################################
  * @edit 2016-08-30 for Joomla 3.6.2 by ghsvs.de
- * @version 2016.08.31
+ * @version 2016.08.31-2
 */
 ?>
 <?php
@@ -46,6 +46,45 @@ $insertTestData boolean true|false
 $dbprefix = ''; 
 $createHangomatTables = true;
 $insertTestData = false;
+
+/**
+ * @since 2016.08.31-2
+ VERWENDEN EINER EXTERNEN DATENBANK.
+
+$useExternalDB boolean true oder false
+ Die folgend eingegebenen Verbindungsdaten sollen verwendet
+ werden, um eine andere als die Joomladatenbank zu verwenden.
+
+ Beachten Sie, dass 1) sich die Datenbank auf dem selben Server
+ befinden muss. Das ist in den allermeisten Fällen gegeben,
+ wenn Datenbanken im selben Webseiten-Account angelegt werden
+ wie Joomla...
+ ... oder 2) die Datenbank externen Zugang zulassen muss,
+ was bei den meisten "normalen" Providern nicht möglich ist.
+
+$host string
+ Häufig 'localhost', weicht aber bei paar Providern ab.
+
+$user string
+ Datenbankuser für Anmeldung.
+
+$password string
+ Datenbankkennwort für Anmeldung.
+
+$database string
+ Datenbankname.
+
+$driver string
+ Im Normalfall 'mysqli'.
+*/
+$useExternalDB = false;
+
+// $dbprefix = #Setze oben $dbprefix!!!!!!
+$host = 'localhost';
+$user = '';
+$password = '';
+$database = '';
+$driver = 'mysqli';
 
 /**
 $szge string
@@ -131,21 +170,36 @@ $loggedIn = $session->get($sessionKey, null);
 // Load CSS and JS in page HEAD. See function addCSSJS below for changes.
 addCSSJS($formAction);
 
+// Init db query variable
+if ($useExternalDB)
+{
+ $options = array(
+  'driver' => $driver,
+  'host' => $host,
+  'user' => $user, 
+  'password' => $password,
+  'database' => $database,
+  'prefix' => $dbprefix
+ );
+ $db = JDatabaseDriver::getInstance($options);
+}
+else
+{
+ $db = JFactory::getDbo();
+}
+$query = $db->getQuery(true);
+
 // Create db tables.
 if ($createHangomatTables)
 {
- createHangomatTables($dbprefix);
+ createHangomatTables($dbprefix, $db);
 }
 
 // Fill db tables with test datas.
 if ($insertTestData)
 {
- insertTestData($dbprefix);
+ insertTestData($dbprefix, $db);
 }
-
-// Init db query variable
-$db = JFactory::getDbo();
-$query = $db->getQuery(true);
 
 // Prepare table names (shortcuts). Add prefix and quote names.
 $hangomat = $db->qn($dbprefix . 'hangomat');
@@ -582,9 +636,8 @@ if (!$Loesungswort)
 /**
 
 */
-function createHangomatTables($dbprefix)
+function createHangomatTables($dbprefix, $db)
 {
- $db = JFactory::getDbo();
  $sql = array();
  $sql[] = "CREATE TABLE IF NOT EXISTS `" . $dbprefix . "hangomat` (
  `Id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -663,7 +716,7 @@ function createHangomatTables($dbprefix)
 /**
 
 */
-function insertTestData($dbprefix)
+function insertTestData($dbprefix, $db)
 {
  $db = JFactory::getDbo();
  $sql = array();
