@@ -725,7 +725,6 @@ function createHangomatTables($dbprefix, $db)
 */
 function insertTestData($dbprefix, $db)
 {
- $db = JFactory::getDbo();
  $sql = array();
  $sql[] = "INSERT INTO `" . $dbprefix . "hangomat_liste` (
  `Id`, `Zeit`, `Name`, `HP`, `Mail`, `Wort`, `Anzahl`) VALUES
