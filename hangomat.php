@@ -189,23 +189,19 @@ if ($loggedIn)
   $db->setQuery($query)->execute();
  } // end Admin has entered new word. Save in db!
  
- $query->clear()->select('*')->from($hangomat)->order($db->qn('Id'), 'ASC');
- $db->setQuery($query);
- $ergebnis = $db->loadAssocList();
- 
  // Delete db entry?
  if ($Hangodel)
  {
-  if($dat = array_shift($ergebnis))
+  $query->clear()->select('MIN(' . $db->qn('Id') . ')')->from($hangomat);
+  $db->setQuery($query);
+  $min = (int) $db->loadResult();
+  if ($min === $Hangodel)
   {
-   if ($dat['Id'] == $Hangodel)
-   {
-    $query->clear()->delete($hangomat_ip);
-    if ($debug) DebugQuery($query, __LINE__, $debug_exit);
-    $db->setQuery($query)->execute();
-   }
-   array_push($ergebnis, $dat);
+   $query->clear()->delete($hangomat_ip);
+   if ($debug) DebugQuery($query, __LINE__, $debug_exit);
+   $db->setQuery($query)->execute();
   }
+
   $query->clear()->delete($hangomat)->where($db->qn('Id') . '=' . $db->q($Hangodel));
   if ($debug) DebugQuery($query, __LINE__, $debug_exit);
   $db->setQuery($query)->execute();
@@ -213,6 +209,11 @@ if ($loggedIn)
  
  $reihen = '&nbsp;&nbsp;&nbsp;(Aktuelles Wort)';
  $Text = '<tr class="hmheader"><td align="center">Neues Wort</td></tr>';
+
+ $query->clear()->select('*')->from($hangomat)->order($db->qn('Id') . ' ASC');
+ $db->setQuery($query);
+ $ergebnis = $db->loadAssocList();
+ 
  foreach ($ergebnis as $dat)
  {
   $col = ($col == 'hmfarbe1' ? 'hmfarbe2' : 'hmfarbe1');
@@ -227,6 +228,7 @@ if ($loggedIn)
  
  // Output admin form.
  echo '<form action="' . $formAction . '" method="post" name="hango">';
+ echo '<input type="hidden" value="" name="Hangodel" />';
  echo $HEADER . $Text . $FOOTER . '</form>';
 } // end Admin action?
 
