@@ -600,7 +600,6 @@ function createHangomatTables($dbprefix)
  `C` int(10) NOT NULL DEFAULT '0',
  `D` int(10) NOT NULL DEFAULT '0',
  `E` int(10) NOT NULL DEFAULT '0',
-
  `F` int(10) NOT NULL DEFAULT '0',
  `G` int(10) NOT NULL DEFAULT '0',
  `H` int(10) NOT NULL DEFAULT '0',
@@ -709,7 +708,6 @@ function insertTestData($dbprefix)
 function addCSSJS($formAction)
 {
  $doc = JFactory::getDocument();
- 
  $css = '
  .hmtabelle {width:70%;}
  .hmfarbe1 {font-size:0.9em;color:#000;}
@@ -727,7 +725,8 @@ function addCSSJS($formAction)
   var box = confirm("Wirklich l&ouml;schen?");
   if (box == true)
   {
-   location.href = "' . $formAction . '?Hangodel=" + id;
+   document.forms.hango.elements.Hangodel.value = id;
+   document.forms.hango.submit();
   }
  }
  
