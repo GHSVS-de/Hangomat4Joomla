@@ -49,14 +49,15 @@ $insertTestData = false;
 
 /**
  * @since 2016.08.31-2
+
  VERWENDEN EINER EXTERNEN DATENBANK.
 
 $useExternalDB boolean true oder false
  HAUPTSCHALTER FÜR Joomla-EXTERNE Datenbank.
- 
+
  Die danach eingegebenen Verbindungsdaten sollen verwendet
  werden, um eine andere als die Joomladatenbank zu verwenden.
- 
+
  Es muss sich dabei NICHT um eine Joomladatenbank handeln.
 
  Beachten Sie, dass
@@ -65,7 +66,7 @@ $useExternalDB boolean true oder false
  Das ist in den allermeisten Fällen gegeben,
  wenn die Fremddatenbank im selben Webseiten-Account angelegt wird
  wie die Joomladatenbank.
- 
+
  Oder 2) die Datenbank externen Zugang zulassen muss,
  was bei den meisten "normalen" Providern nicht möglich ist.
 
