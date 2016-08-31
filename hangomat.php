@@ -29,7 +29,12 @@ $debug_exit = false;
 /**
 $dbprefix string
  Wenn leer wird Joomla-Datenbankprefix verwendet (empfohlen!).
- Wenn man ihn wechselt, daran denken, dass weitere DB-Tabellen
+
+ Seit Version 2016-08-31-2: Leer ist dann mpfohlen, wenn keine
+ externe Datenbank verwendet wird. Siehe dafür weitere Einstellungen
+ unten.
+
+ Wenn man $dbprefix wechselt, daran denken, dass weitere DB-Tabellen
  erzeugt werden. Eben welche mit dem geänderten Prefix.
 
 $createHangomatTables boolean true|false
