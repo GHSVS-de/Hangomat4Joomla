@@ -52,14 +52,21 @@ $insertTestData = false;
  VERWENDEN EINER EXTERNEN DATENBANK.
 
 $useExternalDB boolean true oder false
- Die folgend eingegebenen Verbindungsdaten sollen verwendet
+ HAUPTSCHALTER FÜR Joomla-EXTERNE Datenbank.
+ 
+ Die danach eingegebenen Verbindungsdaten sollen verwendet
  werden, um eine andere als die Joomladatenbank zu verwenden.
+ 
+ Es muss sich dabei NICHT um eine Joomladatenbank handeln.
 
- Beachten Sie, dass 1) sich die Datenbank auf dem selben Server
- befinden muss. Das ist in den allermeisten Fällen gegeben,
- wenn Datenbanken im selben Webseiten-Account angelegt werden
- wie Joomla...
- ... oder 2) die Datenbank externen Zugang zulassen muss,
+ Beachten Sie, dass
+ 1) sich die Datenbank auf dem selben "Server"
+ befinden muss wie das Joomla, das das Script ausführt.
+ Das ist in den allermeisten Fällen gegeben,
+ wenn die Fremddatenbank im selben Webseiten-Account angelegt wird
+ wie die Joomladatenbank.
+ 
+ Oder 2) die Datenbank externen Zugang zulassen muss,
  was bei den meisten "normalen" Providern nicht möglich ist.
 
 $host string
