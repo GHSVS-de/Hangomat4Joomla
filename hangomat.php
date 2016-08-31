@@ -234,7 +234,7 @@ if ($loggedIn)
 } // end Admin action?
 
 $Text = '';
-$query->clear()->select('*')->from($hangomat)->order($db->qn('Id'), 'ASC');
+$query->clear()->select('*')->from($hangomat)->order($db->qn('Id') . ' ASC');
 $db->setQuery($query);
 $ergebnis = $db->loadAssocList();
 
@@ -490,7 +490,7 @@ if(($dat = array_shift($ergebnis)))
  // Anzeige
  if (!$Text)
  {
-  $query->clear()->select('*')->from($hangomat)->order($db->qn('Id'), 'ASC');
+  $query->clear()->select('*')->from($hangomat)->order($db->qn('Id') . ' ASC');
   $db->setQuery($query);
   $ergebnis = $db->loadAssocList();
 
@@ -562,7 +562,7 @@ if (!$Loesungswort)
  $Text = '<tr align="center" class="hmheader"><td colspan=4>Die letzten ' . $loeanz . ' L&ouml;ser</td></tr>';
  $Text .= '<tr align="center" class="hmfarbe1"><th>Gel&ouml;st:</th><th>Name:</th><th>Wort:</th><th>Tage:</th></tr>';
  
- $query->clear()->select('*')->from($hangomat_liste)->order($db->qn('Id'), 'DESC');
+ $query->clear()->select('*')->from($hangomat_liste)->order($db->qn('Id') . ' DESC');
  $db->setQuery($query, 0, $loeanz);
  foreach ($db->loadAssocList() as $dat1)
  {
