@@ -101,6 +101,7 @@ $Buchstabe = $input->get('Buchstabe', '');
 $hm_name = trim($input->get('hm_name', '', 'string'));
 $hm_mail = trim($input->get('hm_mail', '', 'string'));
 $hm_url = trim($input->get('hm_url', '', 'string'));
+$sessionKey = 'hangomat_hmcook.'.$module->id;
 
 // Get IP of user.
 if (isset($_SERVER['REMOTE_ADDR']))
@@ -119,13 +120,13 @@ elseif (isset($_SERVER['HTTP_CLIENT_IP']))
 // Check if admin is logged in and write into session.
 if (!empty($hmcook) && $hmcook === $adminpass)
 {
- $session->set('hangomat.hmcook', 1);
+ $session->set($sessionKey, 1);
 }
 elseif ($hmcook == 'Logout')
 {
- $session->set('hangomat.hmcook', 0);
+ $session->set($sessionKey, null);
 }
-$loggedIn = $session->get('hangomat.hmcook', 0);
+$loggedIn = $session->get($sessionKey, null);
 
 // Load CSS and JS in page HEAD. See function addCSSJS below for changes.
 addCSSJS($formAction);
