@@ -144,15 +144,15 @@ $formAction = htmlspecialchars(JUri::getInstance()->toString());
 $szge = JUri::root(true) . $szge;
 $dbprefix = trim($dbprefix) ? trim($dbprefix) : '#__';
 
-// Read POST and GET datas from forms and URL.
-$hmcook = $input->get('hmcook', '', 'string');
-$hangowort = trim($input->get('hangowort', '', 'string'));
-$Hangodel = (int) $input->get('Hangodel');
-$Loesungswort = trim($input->get('Loesungswort', '', 'string'));
-$Buchstabe = $input->get('Buchstabe', '');
-$hm_name = trim($input->get('hm_name', '', 'string'));
-$hm_mail = trim($input->get('hm_mail', '', 'string'));
-$hm_url = trim($input->get('hm_url', '', 'string'));
+// Read POST datas from forms.
+$hmcook = $input->post->get('hmcook', '', 'string');
+$hangowort = trim($input->post->get('hangowort', '', 'string'));
+$Hangodel = (int) $input->post->get('Hangodel');
+$Loesungswort = trim($input->post->get('Loesungswort', '', 'string'));
+$Buchstabe = $input->post->get('Buchstabe', '');
+$hm_name = trim($input->post->get('hm_name', '', 'string'));
+$hm_mail = trim($input->post->get('hm_mail', '', 'string'));
+$hm_url = trim($input->post->get('hm_url', '', 'string'));
 $sessionKey = 'hangomat_hmcook.'.$module->id;
 
 // Get IP of user.
