@@ -1,0 +1,68 @@
+/* hangomat.css */
+.div4whole-hangomat{
+ width: 100%;
+ text-align: center;
+}
+.div4whole-hangomat h5
+{
+ margin-top: 24px;
+}
+.div4whole-hangomat h4
+{
+ margin-top: 24px;
+}
+.alerter{
+ font-size:1.2em;
+ font-weight:bold;
+}
+.p4letter{display:inline-block;}
+.p4letter input, .p4letter span{
+ display:block;
+ line-height: 24px;
+ font-size: 16px;
+ width: 28px;
+ padding:0;
+ margin:0;
+ border: 2px solid gray;
+}
+.p4letter span{
+ border-color: red;
+ color: white;
+}
+.p4letter input{
+ border-color: green;
+}
+.div4stimmen-heute p{
+ display:inline-block;
+ line-height: 24px;
+ font-size: 16px;
+ min-width: 28px;
+ padding:0;
+ margin:0;
+ border: 2px solid gray;
+}
+.div4stimmen-heute span{
+ display: block;
+ text-align: center;
+}
+span.span4letter{
+ fon-weight: bold;
+ background-color: gray;
+ color:white;
+}
+.siegerName{
+ font-weight: bold;
+ font-size: 1.2em;
+ color: green;
+}
+.siegerWort{
+ color: green;
+}
+.div4letzte-loeser li{
+ text-align:center;
+}
+.aktuellesWort{
+ font-weight: bold;
+ font-size: 1.5em;
+ line-height: 2em;
+}
