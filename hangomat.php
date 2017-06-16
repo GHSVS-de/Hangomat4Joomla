@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 
 #########################################
 ########## EINSTELLUNGEN START ##########
-/**
+/*
 $dbprefix string
  Wenn leer wird Joomla-Datenbankprefix verwendet (empfohlen!).
 
