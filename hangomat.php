@@ -4,7 +4,7 @@
  * ###    Hang-o-Mat v. 2.5   ###   Copyright Jan Erdmann @ http://www.je0.de   ###
  * ################################################################################
  * @edit 2016-08-30 for Joomla 3.6.2 by ghsvs.de
- * @version 2016.09.01
+ * @version 2017.06.16 (tested with Joomla 3.7.3 beta)
 */
 ?>
 <?php
@@ -12,20 +12,6 @@ defined('_JEXEC') or die;
 
 #########################################
 ########## EINSTELLUNGEN START ##########
-
-/**
-$debug boolean true|false
- Siehe function DebugQuery.
- "Debug"-Ausgabe von (bisher) wenigen $query-Zeilen. Siehe im Code:
- if ($debug) DebugQuery($query, __LINE__, $debug_exit);
- Sollte gesetzt werden, bevor die DB-Abfrage abläuft.
-
-$debug_exit boolean true|false
- Unterbricht nach jeweils ausgegebener Debug-Zeile den Code.
-*/
-$debug = false;
-$debug_exit = false;
-
 /**
 $dbprefix string
  Wenn leer wird Joomla-Datenbankprefix verwendet (empfohlen!).
@@ -112,7 +98,7 @@ $adminpass string
  Hangomat-Administrations-Kennwort. Sollte niemals zugleich DB-Passwort oder
  ähnlich gefährlich sein.
 */
-$adminpass = '';
+$adminpass = 'abc';
 
 /**
 $loeanz integer
@@ -123,11 +109,9 @@ $loeanz = 10;
 /**
  Diverse weitere.
 */
-$hmallbuch = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-$hmcount = 0;
+$moeglicheBuchstaben = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+$counter = 0;
 $hmhoch = 0;
-$HEADER = '<table cellspacing=1 cellpadding=2 class="hmtabelle">';
-$FOOTER = '</table>';
 ########## EINSTELLUNGEN ENDE ##########
 ########################################
 
@@ -137,7 +121,6 @@ $Text = $Text2 = $Text3 = $hmswort = $col = $Titel = $jetec_Ip = $stwort = '';
 
 // Init some variables/shortcuts.
 $heuteTag = date('l');
-$hmlaenge = strlen($hmallbuch);
 $session = JFactory::getSession();
 $input = JFactory::getApplication()->input;
 $formAction = htmlspecialchars(JUri::getInstance()->toString());
@@ -180,6 +163,18 @@ elseif ($hmcook == 'Logout')
 }
 $loggedIn = $session->get($sessionKey, null);
 
+// Create Login/Logout input for admin.
+$jehmtt = '<p><input type="button" ';
+if ($loggedIn)
+{
+	$jehmtt .= 'value="Adminlogout" onclick="jehmlogin(0)">';
+}
+else
+{
+	$jehmtt .= 'value="Adminlogin" onclick="jehmlogin(1)">';
+}
+$jehmtt .= '</p>';
+
 // Load CSS and JS in page HEAD. See function addCSSJS below for changes.
 addCSSJS($formAction);
 
@@ -218,21 +213,12 @@ if ($insertTestData)
 $hangomat = $db->qn($dbprefix . 'hangomat');
 $hangomat_ip = $db->qn($dbprefix . 'hangomat_ip');
 $hangomat_liste = $db->qn($dbprefix . 'hangomat_liste');
-
-// Create Login/Logout input for admin.
-$jehmtt = '<input type="button" class="hminput" ';
-if ($loggedIn)
-{
- $jehmtt .= 'value="Adminlogout" onclick="jehmlogin(0)">';
-}
-else
-{
- $jehmtt .= 'value="Adminlogin" onclick="jehmlogin(1)">';
-}
 ?>
-<center>
+<div class="div4whole-hangomat">
+
 <?
-// Admin action?
+
+## START Administrator Panel.
 if ($loggedIn)
 {
  // Admin has entered new word. Save in db!
@@ -266,75 +252,100 @@ if ($loggedIn)
   if ($min === $Hangodel)
   {
    $query->clear()->delete($hangomat_ip);
-   if ($debug) DebugQuery($query, __LINE__, $debug_exit);
+   
    $db->setQuery($query)->execute();
   }
 
   $query->clear()->delete($hangomat)->where($db->qn('Id') . '=' . $db->q($Hangodel));
-  if ($debug) DebugQuery($query, __LINE__, $debug_exit);
+  
   $db->setQuery($query)->execute();
  } // end Delete.
  
- $reihen = '&nbsp;&nbsp;&nbsp;(Aktuelles Wort)';
- $Text = '<tr class="hmheader"><td align="center">Neues Wort</td></tr>';
-
+ ### START Adminbereich Worte.
  $query->clear()->select('*')->from($hangomat)->order($db->qn('Id') . ' ASC');
  $db->setQuery($query);
- $ergebnis = $db->loadAssocList();
- 
- foreach ($ergebnis as $dat)
+ $worte = $db->loadObjectList();
+
+ $textCollector = array('<div class="div4admin">');
+ $textCollector[] = '<h4>Worte verwalten</h4>';
+ if ($worte)
  {
-  $col = ($col == 'hmfarbe1' ? 'hmfarbe2' : 'hmfarbe1');
-  $Text .= '<tr class="' . $col . '"><td><a href="javascript:jehmloesch(\'' . $dat['Id'] . '\')"><img src="' . $szge .'muell.gif" alt="l&ouml;schen" border=0></a>&nbsp;&nbsp;&nbsp;' . $dat['Wort'] . $reihen . '</td></tr>';
-  // ????
-  if ($reihen != '')
+  $textCollector[] = '<ul class="list-striped">';
+  foreach ($worte as $i => $wort)
   {
-   $reihen = '';
+   $textCollector[] = '<li>';
+   $textCollector[] = '<a href="javascript:jehmloesch(\'' . $wort->Id . '\')">löschen</a> ';
+   $textCollector[] = '' . $wort->Wort . ($i == 0 ? ' (Aktuelles Wort)' : '') . '';
+   $textCollector[] = '</li>';
   }
+		$textCollector[] = '</ul>';
  }
- $Text .= '<tr class="hmfarbe1"><td><input type="text" name="hangowort" value="" style="width:200px;" class="hminput">&nbsp;<input type="submit" value="schreiben" name="hangwort" class="hminput"></td></tr>';
+ else
+ {
+  $textCollector[] = '<p>Keine Worte in Datenbank gefunden.</p>';
+ }
  
- // Output admin form.
+ $textCollector[] = '<h5>Neues Wort anlegen</h5>';
+ $textCollector[] = '<p><input type="text" name="hangowort" value=""><br />';
+ $textCollector[] = '<input type="submit" value="schreiben" name="hangwort"></p>';
+ $textCollector[] = '</div><!--/div4admin-->';
+ $Text = implode("\n", $textCollector); 
  echo '<form action="' . $formAction . '" method="post" name="hango">';
  echo '<input type="hidden" value="" name="Hangodel" />';
- echo $HEADER . $Text . $FOOTER . '</form>';
-} // end Admin action?
+ echo $Text . $jehmtt;
+	echo '</form>';
+ echo '<script>document.forms.hango.onkeypress = stopRKey;</script>';
+}
+## ENDE Administrator Panel.
 
+
+// START ANZEIGE FÜR BESUCHER
+// Die Datenbank enthält vom Administrator vorbereitete Worte (s.o.).
+// Dabei ist das mit der niedrigsten Id der aktuelle Wort-Datensatz.
 $Text = '';
 $query->clear()->select('*')->from($hangomat)->order($db->qn('Id') . ' ASC');
 $db->setQuery($query);
 $ergebnis = $db->loadAssocList();
 
+// Aktueller Wort-Datensatz.
 if(($dat = array_shift($ergebnis)))
 {
+
  // Tagwechsel? Dann setze abgestimmte Buchstaben, die korrekt etc.
  if ($dat['Tag'] != $heuteTag)
  {
-  for ($a = 0; $a < $hmlaenge; $a++)
+  for ($a = 0; $a < strlen($moeglicheBuchstaben); $a++)
   {
-   if ($dat[$hmallbuch[$a]] > $hmhoch)
+   if ($dat[$moeglicheBuchstaben[$a]] > $hmhoch)
    {
-    $hmhoch = $dat[$hmallbuch[$a]];
-    $hmmaxx = $hmallbuch[$a];
+    $hmhoch = $dat[$moeglicheBuchstaben[$a]];
+    $hmmaxx = $moeglicheBuchstaben[$a];
    }
-   if ($dat[$hmallbuch[$a]] == $hmhoch)
+   
+   // Absolut gar keine Ahnung, was das soll. Zufallsberechnung.
+   if ($dat[$moeglicheBuchstaben[$a]] == $hmhoch)
    {
     srand((double) microtime() * time());
     $hm = rand(1, 2);
     if ($hm == 1)
     {
-     $hmmaxx = $hmallbuch[$a];
-     $hmhoch = $dat[$hmallbuch[$a]];
+     $hmmaxx = $moeglicheBuchstaben[$a];
+     $hmhoch = $dat[$moeglicheBuchstaben[$a]];
     }
    }
   } // end for
-
+  
+  // $dat['Wort'] ist das komplette, zu findende Lösungswort.
   for ($a = 0; $a < strlen($dat['Wort']); $a++)
   {
    if ($dat['Wort'][$a] == $hmmaxx)
    {
+    
+    // $dat['SWort'] ist das zu findende Lösungswort mit Unterstrich-Platzhaltern.
     $dat['SWort'][$a] = $dat['Wort'][$a];
    }
+   
+   // $dat['Buchstaben'] sind die für Tipps noch zur Verfügung stehenden Buchstaben.
    $hmbuch = str_replace($hmmaxx, '', $dat['Buchstaben']);
   }
   
@@ -343,9 +354,9 @@ if(($dat = array_shift($ergebnis)))
    ->set($db->qn('Tag') . ' = ' . $db->q($heuteTag))
    ->set($db->qn('Anzahl') . ' = ' . $db->q($dat['Anzahl'] + 1));
 
-  for ($a = 0; $a < $hmlaenge; $a++)
+  for ($a = 0; $a < strlen($moeglicheBuchstaben); $a++)
   {
-   $query->set($db->qn($hmallbuch[$a]) . ' = 0');
+   $query->set($db->qn($moeglicheBuchstaben[$a]) . ' = 0');
   }
   
   if ($hmhoch != 0)
@@ -357,7 +368,7 @@ if(($dat = array_shift($ergebnis)))
   $db->setQuery($query)->execute();
   
   $query->clear()->delete($hangomat_ip);
-  if ($debug) DebugQuery($query, __LINE__, $debug_exit);
+  
   $db->setQuery($query)->execute();
  } // end Tagwechsel?
 
@@ -372,7 +383,7 @@ if(($dat = array_shift($ergebnis)))
   
   if ($db->loadResult())
   {
-   $Text = '<tr class="hmfarbe1"><td colspan=2 align="center">Du hast heute schon versucht zu l&ouml;sen, versuche es morgen noch einmal.<br><a href="' . $formAction . '">zur&uuml;ck</a></td></tr>';
+   $Text = '<p class="alert alert-error alerter">Du hast heute schon versucht zu lösen. Versuche es morgen noch einmal.<br><br><a class="btn" href="' . $formAction . '">zurück</a></p>';
   }
   else
   {
@@ -383,21 +394,19 @@ if(($dat = array_shift($ergebnis)))
     if ($hm_name)
     {
      $hm_name = htmlentities($hm_name, ENT_QUOTES, 'UTF-8');
-     #$hm_mail = htmlentities($hm_mail, ENT_QUOTES, 'UTF-8');
      $hm_url = htmlentities($hm_url, ENT_QUOTES, 'UTF-8');
      $hm_name = addslashes($hm_name);
-     #$hm_mail = addslashes($hm_mail);
      $hm_url = addslashes($hm_url);
      $hm_anzahl = $dat['Anzahl'];
 
      if($hm_mail && !JMailHelper::isEmailAddress($hm_mail))
      {
-      $Text = '<tr class="hmfarbe1"><td align="center">Die angegebene Mailadresse ist falsch.<br><a href="' . $formAction . '">zur&uuml;ck</a></td></tr>';
+      $Text='<p class="alert alert-error alerter">Die angegebene Mailadresse ist falsch.<br><br><a class="btn" href="' . $formAction . '">zurück</a></p>';
      }
 
      if ($hm_url && !preg_match("/^[a-zA-Z0-9-_.:\/]+$/", $hm_url))
      {
-      $Text = '<tr class="hmfarbe1"><td align="center">Bitte nur "A-Z", "0-9" und ":/-_." bei "Homepage" benutzen.<br><a href="' . $formAction . '">zur&uuml;ck</a></td></tr>';
+      $Text='<p class="alert alert-success alerter">Bitte nur "A-Z", "0-9" und ":/-_." bei "Homepage" benutzen.<br><br><a class="btn" href="' . $formAction . '">zurück</a></p>';
      }
 
      if (substr($hm_url, 0, 4) != 'http')
@@ -411,11 +420,11 @@ if(($dat = array_shift($ergebnis)))
       // Delete now outdated entry and IPs.
       $query->clear()->delete($hangomat)
       ->where($db->qn('Id') . '=' . $db->q($dat['Id']));
-      if ($debug) DebugQuery($query, __LINE__, $debug_exit);
+      
       $db->setQuery($query)->execute();
 
       $query->clear()->delete($hangomat_ip);
-      if ($debug) DebugQuery($query, __LINE__, $debug_exit);
+
       $db->setQuery($query)->execute();
       
       // Update next entry. Remember last correct answer...
@@ -449,33 +458,36 @@ if(($dat = array_shift($ergebnis)))
        ->columns($db->qn($columns))->values(implode(',', $values));
       $db->setQuery($query)->execute();
       
+      // $dat['LWort'] ist das zuletzt fertig gelöste Wort.
       $dat['LWort'] = $Loesungswort;
       
-      $Text='<tr class="hmfarbe1"><td colspan=2 align="center">Du wurdest in die Liste eingetragen.<br><a href="' . $formAction . '">zur&uuml;ck</a></td></tr>';
+      $Text='<p class="alert alert-success alerter">Du wurdest in die Liste eingetragen.<br><br><a class="btn" href="' . $formAction . '">zurück</a></p>';
      } // end if (!$Text)
     }
     // Winning user has not yet entered name, mail... Show a form for these datas.
     else
     {
-     $Text = array();
-     $Text[] = '<tr class="hmfarbe1"><td colspan=2>Die Antwort ist Richtig, das gesuchte Wort ist "<b>' . $dat['Wort'] . '</b>".<br>Du kannst dich in die Liste eintragen.</td></tr>';
-     $Text[] = '<tr class="hmfarbe2"><td align="right">Name:&nbsp;</td><td><input type="text" name="hm_name" style="width:300;" maxlength=50 class="hminput"></td></tr>';
-     $Text[] = '<tr class="hmfarbe2"><td align="right">Homepage:&nbsp;</td><td><input type="url" name="hm_url" style="width:300;" maxlength=255 class="hminput"></td></tr>';
-     $Text[] = '<tr class="hmfarbe2"><td align="right">E-Mail:&nbsp;</td><td><input type="email" name="hm_mail" style="width:300;" maxlength=50 class="hminput"></td></tr>';
-     $Text[] = '<tr class="hmfarbe1"><td align="center" colspan=2>';
-     $Text[] = '<input type="hidden" name="Loesungswort" value="' . $dat['Wort'] . '">';
-     $Text[] = '<input type="submit" value="&nbsp;Eintragen&nbsp;" class="hminput"></td></tr>';
-     $Text = implode('', $Text);
+     $textCollector = array();
+     $textCollector[] = '<p class="alert alert-success alerter">Die Antwort ist Richtig!<br />Das gesuchte Wort ist "<strong>' . $dat['Wort'] . '</strong>".<br /><br />
+<strong>Du kannst dich in die Liste der Sieger eintragen!</strong></p>';
+     
+     $textCollector[] = '<p>Name:<br /><input type="text" name="hm_name" maxlength=50></p>';
+     $textCollector[] = '<p>Homepage:<br /><input type="url" name="hm_url" maxlength=255></p>';
+     $textCollector[] = '<p>E-Mail:<br /><input type="email" name="hm_mail" maxlength=50></p>';
+     $textCollector[] = '<input type="hidden" name="Loesungswort" value="' . $dat['Wort'] . '">';
+     $textCollector[] = '<p><input type="submit" value="Eintragen"></p>';
+     $Text = implode("\n", $textCollector);
     }
    }
    // User tried it but incorrect answer. Block IP for today.
    else
    {
-    $Text = '<tr class="hmfarbe1"><td colspan=2 align="center">Leider ist der eingegeben Begriff falsch, versuche es morgen noch einmal.<br><a href="' . $formAction . '">zur&uuml;ck</a></td></tr>';
+    
+    $Text = '<p class="alert alert-error alerter">Leider ist der eingegeben Begriff falsch!<br />
+Versuche es morgen noch einmal!<br><br><a href="' . $formAction . '" class="btn">zurück</a></p>';
 
     $query->clear()->delete($hangomat_ip)
     ->where($db->qn('Ip') . '=' . $db->q($jetec_Ip));
-    if ($debug) DebugQuery($query, __LINE__, $debug_exit);
     $db->setQuery($query)->execute();
     
     $columns = array('Try', 'Ip');
@@ -487,13 +499,16 @@ if(($dat = array_shift($ergebnis)))
     $db->setQuery($query)->execute();
    }
   }
-  echo '<form method="post" action="' . $formAction . '" name="loesen">' . $HEADER;
-  echo '<tr class="hmheader"><td align="center" colspan=2>' . $Titel . '</td></tr>
-' . $Text . $FOOTER . '</form>';
- } // end Lösungsversuch durch Worteingabe?
+  echo '<form method="post" action="' . $formAction . '" name="loesen">';
+  echo $Text . '</form>';
+  echo '<script>document.forms.loesen.onkeypress = stopRKey;</script>';
+ }
+ // end Lösungsversuch durch Worteingabe?
+
 
  // Voting für einzelnen Buchstaben?
  $vote = 9;
+
  // Single letter selected.
  if ($Buchstabe && (preg_match ("/^[A-Z]+$/", $Buchstabe)))
  {
@@ -501,8 +516,8 @@ if(($dat = array_shift($ergebnis)))
   $query->clear()->select($db->qn('Id'))->from($hangomat)
    ->where($db->qn('Buchstaben') . ' NOT LIKE ' . $db->q('%' . $Buchstabe . '%'))
    ->where($db->qn('Id') . '=' . $db->q($dat['Id']));
-  if ($debug) DebugQuery($query, __LINE__, $debug_exit);
   $db->setQuery($query);
+
   if ($db->loadResult())  
   {
    $Text = 'Der Buchstabe "<b>' . $Buchstabe . '</b>" steht nicht mehr zur Auswahl.<br><a href="' . $formAction . '">zur&uuml;ck</a>';
@@ -521,7 +536,8 @@ if(($dat = array_shift($ergebnis)))
   // User may not vote for a letter.
   if ($vote == 1)
   {
-   $Text = 'Du hast Heute bereits f&uuml;r den Buchstaben "<b>' . $dat1['Buch'] . '</b>" gevotet, versuche es Morgen noch einmal.<br><a href="' . $formAction . '">zur&uuml;ck</a>';
+   $Text = '<p class="alert alert-error alerter">Du hast heute bereits für den Buchstaben "<b>' . $dat1['Buch'] . '</b>" gevotet!<br />
+Versuche es morgen noch einmal!<br><br><a href="' . $formAction . '" class="btn">zurück</a></p>';
   }
   
   // User may vote for a letter.
@@ -554,64 +570,148 @@ if(($dat = array_shift($ergebnis)))
   } // end // User may vote for a letter.
  } // end Voting für einzelnen Buchstaben?
 
- // Anzeige
+
+
+ // Anzeige bei Erstbesuch.
  if (!$Text)
  {
+  
+  // Datensätze der angelegten Worte auslesen.
   $query->clear()->select('*')->from($hangomat)->order($db->qn('Id') . ' ASC');
   $db->setQuery($query);
   $ergebnis = $db->loadAssocList();
-
+  
+  // Datensatz $dat mit niedrigster Id ist aktuelles.
   if(($dat = array_shift($ergebnis)))
   {
-   $Text = '<table cellpadding=5 cellspacing=1 class="hmtabelle"><tr align="center" class="hmfarbe2">
-<td class="hmfarbe3" rowspan=2>Buchstaben:</td>';
-
-   for ($a=0; $a < $hmlaenge; $a++)
+   #### START Zu lösendes Wort (mit Unterstrichen) ausgeben.
+   $textCollector = array('<div class="div4zu-loesendes-wort">');
+   $textCollector[] = '<h4>Löse dieses Wort!</h4>';
+   $textCollector[] = '<p class="aktuellesWort">';
+			$wortlaenge = strlen($dat['SWort']);
+   for ($a=0; $a < $wortlaenge; $a++)
    {
-    if ($dat[$hmallbuch[$a]] > 0)
+    $textCollector[] = '&nbsp;' . $dat['SWort'][$a];
+   }
+   $textCollector[] = '</p>';
+   $textCollector[] = '<p class="description">';
+			$textCollector[] = 'Das gesuchte Wort hat ' . $wortlaenge . ' Buchstaben.';
+   $textCollector[] = '<br />Das Wort läuft seit ' . $dat['Anzahl'];
+   $textCollector[] = ' Tag' . ($dat['Anzahl'] != 1 ? 'en.' : '.');
+   if ($dat['Last'])
+   {
+    // $textCollector[] = '<br />Letzter ausgewerteter Buchstabe: ' . $dat['Last'];
+   }
+   if ($dat['LWort'])
+   {
+    $textCollector[] = '<br />Letzter gelöster Begriff: ' . $dat['LWort'] . '.';
+   }
+   $textCollector[] = '</p>';
+   $textCollector[] = '</div><!--/div4zu-loesendes-wort-->';
+   $Text .= implode("\n", $textCollector);
+   #### ENDE Zu lösendes Wort (mit Unterstrichen) ausgeben.
+
+   #### START Buchstabenfelder A-Z.
+   $textCollector = array('<div class="div4buchstaben">');
+   $textCollector[] = '<h5>Wähle entweder einen Buchstaben...</h5>';
+   
+   // Alle grundlegend möglichen Buchstaben durchlaufen.
+   for ($a=0; $a < strlen($moeglicheBuchstaben); $a++)
+   {
+    
+    // Bspw. [A] => 2. $dat['A']. Also die heute schon gemachten Tipps/Klicks
+    // für den Buchstaben A, die erst am Folgetag ausgewertet werden.
+    if ($dat[$moeglicheBuchstaben[$a]] > 0)
     {
-     $W1[$a] = $dat[$hmallbuch[$a]];
-     $W2[$a] = $hmallbuch[$a];
+     // Wie oft wurde der Buchstabe heute schon getippt?
+     $W1[$a] = $dat[$moeglicheBuchstaben[$a]];
+     // Der Buchstabe selbst.
+     $W2[$a] = $moeglicheBuchstaben[$a];
     }
-    if ($dat['Buchstaben'][$hmcount] == $hmallbuch[$a])
+    
+    $textCollector[] = '<p class="p4letter">';
+    
+    // Für Auswahl gesperrter Buchstabe oder nicht.
+    if ($dat['Buchstaben'][$counter] == $moeglicheBuchstaben[$a])
     {
-     $Text .= '<td align="center"><input type="submit" value="' . $hmallbuch[$a] . '" name="Buchstabe" class="hminput" style="width:25; height:25;"></td>';
-     $hmcount++;
+     $textCollector[] = '<input type="submit" value="' . $moeglicheBuchstaben[$a] . '" name="Buchstabe">';
+     $counter++;
     }
     else
     {
-     $Text .= '<td align="center"><input type="button" value="' . $hmallbuch[$a] . '" class="hminput1" style="width:25; height:25;"></td>';
+     $textCollector[] = '<span>' . $moeglicheBuchstaben[$a] . '</span>';
     }
-    if ($a == 12)
-    {
-     $Text .= '</tr><tr class="hmfarbe2">';
-    }
-   } // end for ($a=0; $a < $hmlaenge; $a++)
-
+    $textCollector[] = '</p><!--/p4letter-->';
+   }
+   $textCollector[] = '</div><!--/div4buchstaben-->';
+   $Text .= implode("\n", $textCollector);
+   #### ENDE Buchstabenfelder A-Z.
+   
+   #### START Heute getippte Buchstaben ausgeben.
+   $textCollector = array('<div class="div4stimmen-heute">');
+   $textCollector[] = '<h6>Heute schon getippte Buchstaben</h6>';
    if ($W1 && $W2)
    {
     array_multisort($W1, SORT_NUMERIC, SORT_DESC, $W2);
-   }
 
-   for ($a=0; $a < count($W1); $a++)
-   {
-    $Text2 .= '<td align="center"><b>' . $W2[$a] . '</b></td>';
-    $Text3 .= '<td align="center">' . $W1[$a] . '</td>';
+    for ($a=0; $a < count($W1); $a++)
+    {
+     $textCollector[] = '<p>';
+     $textCollector[] = '<span class="span4letter">' . $W2[$a] . '</span>';
+     $textCollector[] = '<span class="span4votes">' . $W1[$a] . 'x</span>';
+     $textCollector[] = '</p>';
+    }
    }
+   else
+   {
+    $textCollector[] = '<div>Heute hat noch niemand getippt.' . '</div>';
+   }
+   $textCollector[] = '</div><!--/div4stimmen-heute-->';
+   $Text .= implode("\n", $textCollector);
+   #### ENDE Heute getippte Buchstaben ausgeben.
    
    
-   for ($a=0; $a < strlen($dat['SWort']); $a++)
+   #### START Lösungswort direkt eingeben.
+   $textCollector = array('<div class="div4loesungswort-eingabe">');
+   $textCollector[] = '<h5>..oder löse das ganze Wort!</h5>';
+   $textCollector[] = '<p>';
+   $textCollector[] = '<input type="text" name="Loesungswort"><br />';
+   $textCollector[] = '<input type="submit" value="Lösen">';
+   $textCollector[] = '</p>';
+   $textCollector[] = '</div><!--/div4loesungswort-eingabe-->';
+   $Text .= implode("\n", $textCollector);
+   #### ENDE Lösungswort direkt eingeben.
+   
+   
+   #### START Die letzten X Löser anzeigen.
+   $query->clear()->select('*')->from($hangomat_liste)->order($db->qn('Id') . ' DESC');
+   $db->setQuery($query, 0, $loeanz);
+   $loeser = $db->loadObjectList();
+   
+   $textCollector = array('<div class="div4letzte-loeser">');
+   $textCollector[] = '<h5>Die letzten ' . $loeanz . ' Sieger</h5>';
+   if ($loeser)
    {
-    $hmswort .= '&nbsp;' . $dat['SWort'][$a];
+    $textCollector[] = '<ul class="list-striped">';
+    foreach ($loeser as $i => $sieger)
+    {
+     $textCollector[] = '<li>';
+     $textCollector[] = '<span class="siegerName">' . $sieger->Name . '</span>';
+     $textCollector[] = '<br />löste <span class="siegerName">' . $sieger->Wort . '</span>';
+     $textCollector[] = '<br /> nach <span class="siegerName">' . $sieger->Anzahl . '</span> Tag' . ($sieger->Anzahl > 1 ? 'en' : '');
+     $textCollector[] = ' am ' . date('d.m.Y', $sieger->Zeit) . '.';
+     $textCollector[] = '</li>';
+    }
+    $textCollector[] = '</ul>';
    }
+   else
+   {
+    $textCollector[] = '<p>Keine in Datenbank gefunden.</p>';
+   }
+   $textCollector[] = '</div><!--/div4letzte-loeser-->';
+   $Text .= implode("\n", $textCollector);
+   #### ENDE Die letzten X Löser anzeigen.
 
-   $Text .= '</tr></table>';
-   $Text .= "<br><table cellpadding=5 cellspacing=1 class=\"hmtabelle\"><tr align=\"center\" class=\"hmfarbe2\"><td align=\"center\" class=\"hmfarbe3\">Buchstaben:</td>" . $Text2 . "</tr><tr align=\"center\" class=\"hmfarbe2\"><td align=\"center\" class=\"hmfarbe3\">Stimmen:</td>" . $Text3 . "</tr></table>
-<br><span style=\"FONT-SIZE:20px; FONT-WEIGHT: bold;\">" . $hmswort . "</span><br><br>
-Das Wort l&auml;uft seit <b>&nbsp;" . $dat['Anzahl'] . "&nbsp;</b> Tag" . ($dat['Anzahl'] != 1 ? "en" : "")."<br>
-Letzter gel&ouml;ster Begriff: <b>&nbsp;" . $dat['LWort'] . "</b>&nbsp;<br>
-Letzter bewerteter Buchstabe: <b>&nbsp;" . $dat['Last'] . "&nbsp;</b><br>
-<input type=\"text\" name=\"Loesungswort\" style=\"width:300;\" class=\"hminput\">&nbsp;<input type=\"submit\" value=\"&nbsp;L&ouml;sen&nbsp;\" class=\"hminput\"><br><br>" . $jehmtt;
   }
  }
 }
@@ -622,28 +722,18 @@ else
 
 if (!$Loesungswort)
 {
- echo '<form method="post" action="' . $formAction . '" name="hmform"><input type="hidden" value="" name="hmcook">' . $HEADER;
- echo '<tr class="hmheader"><td align="center">' . $Titel . '</td></tr>';
- echo '<tr class="hmfarbe1"><td align="center">' . $Text . '</td></tr>';
- echo $FOOTER . '</form>';
- $Text = '<tr align="center" class="hmheader"><td colspan=4>Die letzten ' . $loeanz . ' L&ouml;ser</td></tr>';
- $Text .= '<tr align="center" class="hmfarbe1"><th>Gel&ouml;st:</th><th>Name:</th><th>Wort:</th><th>Tage:</th></tr>';
+ echo '<form method="post" action="' . $formAction . '" name="hmform"><input type="hidden" value="" name="hmcook">';
+ echo $Text;
  
- $query->clear()->select('*')->from($hangomat_liste)->order($db->qn('Id') . ' DESC');
- $db->setQuery($query, 0, $loeanz);
- foreach ($db->loadAssocList() as $dat1)
- {
-  $col = ($col == 'hmfarbe1' ? 'hmfarbe2' : 'hmfarbe1');
-  if ($dat1['Mail'])
-  {
-   // $dat1['Name'] = '<a href="mailto:' . $dat1['Mail'] . '">' . $dat1['Name'] . '</a>';
-  }
-  $Text .= '<tr class="' . $col . '"><td>' . date('d.m.Y', $dat1['Zeit']) . '</td><td>' . $dat1['Name'] . '</td><td align="center">' . $dat1['Wort'] . '</td><td align="center">' . $dat1['Anzahl'] . '</td></tr>';
- }
- echo $HEADER . $Text . $FOOTER;
+
+ echo '<p>' . $jehmtt . '</p>';
+ 
+ echo '</form>';
+ echo '<script>document.forms.hmform.onkeypress = stopRKey;</script>';
 }
 ?>
-</center>
+
+</div><!--/div4whole-hangomat-->
 <?php
 
 /**
@@ -774,20 +864,71 @@ function addCSSJS($formAction)
 {
  $doc = JFactory::getDocument();
  $css = '
- .hmtabelle {width:70%;}
- .hmfarbe1 {font-size:0.9em;color:#000;}
- .hmfarbe2 {background-color:transparent;font-size:0.9em;color:#000;}
- .hmfarbe3 {font-size:0.8em;color:#000;}
- .hmheader {background-color:transparent;font-size:1.3em;color:#000;font-weight:bold;}
- .hminput {font-size:1em;color:#000;background-color:#EAEAEA;border:1px ridge #000;}
- .hminput1 {font-size:1em;color:#777;background-color:#999;border:1px ridge #999;}
+.div4whole-hangomat{
+	width: 100%;
+	text-align: center;
+}
+.alerter{
+ font-size:1.2em;
+ font-weight:bold;
+}
+.p4letter{display:inline-block;}
+.p4letter input, .p4letter span{
+ display:block;
+ line-height: 24px;
+ font-size: 16px;
+ width: 28px;
+ padding:0;
+ margin:0;
+ border: 2px solid gray;
+}
+.p4letter span{
+ border-color: red;
+ color: white;
+}
+.p4letter input{
+ border-color: green;
+}
+.div4stimmen-heute p{
+ display:inline-block;
+ line-height: 24px;
+ font-size: 16px;
+ min-width: 28px;
+ padding:0;
+ margin:0;
+ border: 2px solid gray;
+}
+.div4stimmen-heute span{
+ display: block;
+ text-align: center;
+}
+span.span4letter{
+ fon-weight: bold;
+ background-color: gray;
+ color:white;
+}
+.siegerName{
+ font-weight: bold;
+ font-size: 1.2em;
+ color: green;
+}
+.siegerWort{
+ color: green;
+}
+.div4letzte-loeser li{
+ text-align:center;
+}
+.aktuellesWort{
+ font-weight: bold;
+ font-size: 1.5em;
+}
  ';
  $doc->addStyleDeclaration($css);
  
  $js = '
  function jehmloesch(id)
  {
-  var box = confirm("Wirklich l&ouml;schen?");
+  var box = confirm("Wirklich löschen?");
   if (box == true)
   {
    document.forms.hango.elements.Hangodel.value = id;
@@ -811,15 +952,11 @@ function addCSSJS($formAction)
   }
   document.forms.hmform.submit();
  }
+ function stopRKey(evt) {
+   var evt = (evt) ? evt : ((event) ? event : null);
+   var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+   if ((evt.keyCode == 13) && (node.type=="text"))  {return false;}
+ }
  ';
  $doc->addScriptDeclaration($js);
-}
-
-function DebugQuery($query, $line, $debug_exit = true)
-{
- echo 'DEBUG Line: ' . $line . ':' .print_r((string) $query,true);
- if ($debug_exit)
- {
-  exit;
- }
 }
