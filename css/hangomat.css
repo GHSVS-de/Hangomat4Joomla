@@ -11,12 +11,13 @@
 {
  margin-top: 24px;
 }
-.alerter{
+.div4whole-hangomat .alerter{
  font-size:1.2em;
  font-weight:bold;
 }
-.p4letter{display:inline-block;}
-.p4letter input, .p4letter span{
+.div4whole-hangomat .p4letter{display:inline-block;}
+.div4whole-hangomat .p4letter input,
+.div4whole-hangomat .p4letter span{
  display:block;
  line-height: 24px;
  font-size: 16px;
@@ -25,14 +26,17 @@
  margin:0;
  border: 2px solid gray;
 }
-.p4letter span{
+.div4whole-hangomat .p4letter span{
  border-color: red;
  color: white;
+ background-color: red;
 }
-.p4letter input{
+.div4whole-hangomat .p4letter input{
  border-color: green;
+ background-color: green;
+ color: white;
 }
-.div4stimmen-heute p{
+.div4whole-hangomat .div4stimmen-heute p{
  display:inline-block;
  line-height: 24px;
  font-size: 16px;
@@ -41,28 +45,28 @@
  margin:0;
  border: 2px solid gray;
 }
-.div4stimmen-heute span{
+.div4whole-hangomat .div4stimmen-heute span{
  display: block;
  text-align: center;
 }
-span.span4letter{
+.div4whole-hangomat span.span4letter{
  fon-weight: bold;
  background-color: gray;
  color:white;
 }
-.siegerName{
+.div4whole-hangomat .siegerName{
  font-weight: bold;
  font-size: 1.2em;
  color: green;
 }
-.siegerWort{
+.div4whole-hangomat .siegerWort{
  color: green;
 }
-.div4letzte-loeser li{
+.div4whole-hangomat .div4letzte-loeser li{
  text-align:center;
 }
-.aktuellesWort{
+.div4whole-hangomat .aktuellesWort{
  font-weight: bold;
- font-size: 1.5em;
+ font-size: 1.2em;
  line-height: 2em;
 }
