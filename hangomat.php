@@ -10,132 +10,42 @@
 <?php
 defined('_JEXEC') or die;
 
-#########################################
-########## EINSTELLUNGEN START ##########
-/*
-$dbprefix string
- Wenn leer wird Joomla-Datenbankprefix verwendet (empfohlen!).
+if (file_exists(__DIR__ . '/hangomat-configuration.php'))
+{
+ $hmconfig = array();
+ require_once(__DIR__ . '/hangomat-configuration.php');
+ if (!is_array($hmconfig))
+ {
+  $hmconfig = array();
+ }
+ $hmconfig = new Joomla\Registry\Registry($hmconfig);
+}
+else
+{
+ JFactory::getApplication()->enqueueMessage('Konfigurationsdatei hangomat-configuration.php nicht gefunden! <a href="https://github.com/GHSVS-de/Hangomat4Joomla/wiki/Konfigurationsdatei-f%C3%BCr-hangomat.php">Bitte lesen Sie Anleitung im Wiki</a>', 'error');
+ return;
+}
 
- Seit Version 2016-08-31-2: Leer ist dann mpfohlen, wenn keine
- externe Datenbank verwendet wird. Siehe dafür weitere Einstellungen
- unten.
-
- Wenn man $dbprefix wechselt, daran denken, dass weitere DB-Tabellen
- erzeugt werden. Eben welche mit dem geänderten Prefix.
-
-$createHangomatTables boolean true|false
- Siehe auch function createHangomatTables.
- Sollen Datenbanktabellen erstellt werden? Existierende werden
- NICHT überschrieben. Empfohlen ist false, wenn Tabellen
- bereits angelegt sind; wegen Performance.
-
-$insertTestData boolean true|false
- Siehe auch function insertTestData.
- Legt Testdaten in Tabellen ab. VORSICHT! Wenn Tabelle bereits
- gefüllt, gibt's Fehlermeldungen. Geht aber nichts kaputt.
-*/
-$dbprefix = ''; 
-$createHangomatTables = true;
-$insertTestData = false;
-
-/**
- * @since 2016.08.31-2
-
- VERWENDEN EINER EXTERNEN DATENBANK.
-
-$useExternalDB boolean true oder false
- HAUPTSCHALTER FÜR Joomla-EXTERNE Datenbank.
-
- Die danach eingegebenen Verbindungsdaten sollen verwendet
- werden, um eine andere als die Joomladatenbank zu verwenden.
-
- Es muss sich dabei NICHT um eine Joomladatenbank handeln.
-
- Beachten Sie, dass
- 1) sich die Datenbank auf dem selben "Server"
- befinden muss wie das Joomla, das das Script ausführt.
- Das ist in den allermeisten Fällen gegeben,
- wenn die Fremddatenbank im selben Webseiten-Account angelegt wird
- wie die Joomladatenbank.
-
- Oder 2) die Datenbank externen Zugang zulassen muss,
- was bei den meisten "normalen" Providern nicht möglich ist.
-
-$host string
- Häufig 'localhost', weicht aber bei paar Providern ab.
-
-$user string
- Datenbankuser für Anmeldung.
-
-$password string
- Datenbankkennwort für Anmeldung.
-
-$database string
- Datenbankname.
-
-$driver string
- Im Normalfall 'mysqli'.
-*/
-$useExternalDB = false;
-
-// $dbprefix = #Setze oben $dbprefix!!!!!!
-$host = 'localhost';
-$user = '';
-$password = '';
-$database = '';
-$driver = 'mysqli';
-
-/**
-$szge string
- Grafikordner mit Hangomat-Grafiken innerhalb Joomla-Installatio.
- Bsp.: '/images/hangomat/'.
- Beachte: Relative Pfade sind NICHT empfohlen.
-*/
-$szge = '/images/hangomat/';
-
-/**
-$adminpass string
- Hangomat-Administrations-Kennwort. Sollte niemals zugleich DB-Passwort oder
- ähnlich gefährlich sein.
-*/
-$adminpass = 'abc';
-
-/**
-$loeanz integer
- Anzahl der anzuzeigenden Löser-Namen.
-*/
-$loeanz = 10;
-
-/**
- Diverse weitere.
-*/
-$moeglicheBuchstaben = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+$moeglicheBuchstaben = trim($hmconfig->get('moeglicheBuchstaben', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'));
 $counter = 0;
 $hmhoch = 0;
-########## EINSTELLUNGEN ENDE ##########
-########################################
-
-// Init some variables to avoid Warnings and Notices.
 $W1 = $W2 = array();
 $Text = $Text2 = $Text3 = $hmswort = $col = $Titel = $jetec_Ip = $stwort = '';
 
-// Init some variables/shortcuts.
 $heuteTag = date('l');
 $session = JFactory::getSession();
 $input = JFactory::getApplication()->input;
 $formAction = htmlspecialchars(JUri::getInstance()->toString());
-$szge = JUri::root(true) . $szge;
-$dbprefix = trim($dbprefix) ? trim($dbprefix) : '#__';
+$dbprefix = trim($hmconfig->get('dbprefix', '#__'));
 
 // Read POST datas from forms.
-$hmcook = $input->post->get('hmcook', '', 'string');
+$hmcook = trim($input->post->get('hmcook', '', 'string'));
 $hangowort = trim($input->post->get('hangowort', '', 'string'));
 $Hangodel = (int) $input->post->get('Hangodel');
 $Loesungswort = trim($input->post->get('Loesungswort', '', 'string'));
 $Buchstabe = $input->post->get('Buchstabe', '');
 $hm_name = trim($input->post->get('hm_name', '', 'string'));
 $hm_mail = trim($input->post->get('hm_mail', '', 'string'));
-$hm_url = trim($input->post->get('hm_url', '', 'string'));
 $sessionKey = 'hangomat_hmcook.'.$module->id;
 
 // Get IP of user.
@@ -153,7 +63,7 @@ elseif (isset($_SERVER['HTTP_CLIENT_IP']))
 }
 
 // Check if admin is logged in and write into session.
-if (!empty($hmcook) && $hmcook === $adminpass)
+if (!empty($hmcook) && $hmcook === trim($hmconfig->get('adminpass', '')))
 {
  $session->set($sessionKey, 1);
 }
@@ -167,11 +77,11 @@ $loggedIn = $session->get($sessionKey, null);
 $jehmtt = '<p><input type="button" ';
 if ($loggedIn)
 {
-	$jehmtt .= 'value="Adminlogout" onclick="jehmlogin(0)">';
+ $jehmtt .= 'value="Adminlogout" onclick="jehmlogin(0)">';
 }
 else
 {
-	$jehmtt .= 'value="Adminlogin" onclick="jehmlogin(1)">';
+ $jehmtt .= 'value="Adminlogin" onclick="jehmlogin(1)">';
 }
 $jehmtt .= '</p>';
 
@@ -179,32 +89,17 @@ $jehmtt .= '</p>';
 addCSSJS($formAction);
 
 // Init db query variable
-if ($useExternalDB)
-{
- $options = array(
-  'driver' => $driver,
-  'host' => $host,
-  'user' => $user, 
-  'password' => $password,
-  'database' => $database,
-  'prefix' => $dbprefix
- );
- $db = JDatabaseDriver::getInstance($options);
-}
-else
-{
- $db = JFactory::getDbo();
-}
+$db = JFactory::getDbo();
 $query = $db->getQuery(true);
 
 // Create db tables.
-if ($createHangomatTables)
+if ($hmconfig->get('createHangomatTables', true))
 {
  createHangomatTables($dbprefix, $db);
 }
 
 // Fill db tables with test datas.
-if ($insertTestData)
+if ($hmconfig->get('insertTestData', false))
 {
  insertTestData($dbprefix, $db);
 }
@@ -278,7 +173,7 @@ if ($loggedIn)
    $textCollector[] = '' . $wort->Wort . ($i == 0 ? ' (Aktuelles Wort)' : '') . '';
    $textCollector[] = '</li>';
   }
-		$textCollector[] = '</ul>';
+  $textCollector[] = '</ul>';
  }
  else
  {
@@ -293,7 +188,7 @@ if ($loggedIn)
  echo '<form action="' . $formAction . '" method="post" name="hango">';
  echo '<input type="hidden" value="" name="Hangodel" />';
  echo $Text . $jehmtt;
-	echo '</form>';
+ echo '</form>';
  echo '<script>document.forms.hango.onkeypress = stopRKey;</script>';
 }
 ## ENDE Administrator Panel.
@@ -394,24 +289,12 @@ if(($dat = array_shift($ergebnis)))
     if ($hm_name)
     {
      $hm_name = htmlentities($hm_name, ENT_QUOTES, 'UTF-8');
-     $hm_url = htmlentities($hm_url, ENT_QUOTES, 'UTF-8');
      $hm_name = addslashes($hm_name);
-     $hm_url = addslashes($hm_url);
      $hm_anzahl = $dat['Anzahl'];
 
      if($hm_mail && !JMailHelper::isEmailAddress($hm_mail))
      {
       $Text='<p class="alert alert-error alerter">Die angegebene Mailadresse ist falsch.<br><br><a class="btn" href="' . $formAction . '">zurück</a></p>';
-     }
-
-     if ($hm_url && !preg_match("/^[a-zA-Z0-9-_.:\/]+$/", $hm_url))
-     {
-      $Text='<p class="alert alert-success alerter">Bitte nur "A-Z", "0-9" und ":/-_." bei "Homepage" benutzen.<br><br><a class="btn" href="' . $formAction . '">zurück</a></p>';
-     }
-
-     if (substr($hm_url, 0, 4) != 'http')
-     {
-      $hm_url = 'http://' . $hm_url;
      }
      
      // All user datas are correctly entered. So update.
@@ -449,7 +332,7 @@ if(($dat = array_shift($ergebnis)))
       $values = array(
        $db->q(time()),
        $db->q($hm_name),
-       $db->q($hm_url),
+       $db->q(''), // ehemals $hm_url
        $db->q($hm_mail),
        $db->q($Loesungswort),
        $db->q($hm_anzahl),
@@ -472,7 +355,6 @@ if(($dat = array_shift($ergebnis)))
 <strong>Du kannst dich in die Liste der Sieger eintragen!</strong></p>';
      
      $textCollector[] = '<p>Name:<br /><input type="text" name="hm_name" maxlength=50></p>';
-     $textCollector[] = '<p>Homepage:<br /><input type="url" name="hm_url" maxlength=255></p>';
      $textCollector[] = '<p>E-Mail:<br /><input type="email" name="hm_mail" maxlength=50></p>';
      $textCollector[] = '<input type="hidden" name="Loesungswort" value="' . $dat['Wort'] . '">';
      $textCollector[] = '<p><input type="submit" value="Eintragen"></p>';
@@ -588,14 +470,14 @@ Versuche es morgen noch einmal!<br><br><a href="' . $formAction . '" class="btn"
    $textCollector = array('<div class="div4zu-loesendes-wort">');
    $textCollector[] = '<h4>Löse dieses Wort!</h4>';
    $textCollector[] = '<p class="aktuellesWort">';
-			$wortlaenge = strlen($dat['SWort']);
+   $wortlaenge = strlen($dat['SWort']);
    for ($a=0; $a < $wortlaenge; $a++)
    {
     $textCollector[] = '&nbsp;' . $dat['SWort'][$a];
    }
    $textCollector[] = '</p>';
    $textCollector[] = '<p class="description">';
-			$textCollector[] = 'Das gesuchte Wort hat ' . $wortlaenge . ' Buchstaben.';
+   $textCollector[] = 'Das gesuchte Wort hat ' . $wortlaenge . ' Buchstaben.';
    $textCollector[] = '<br />Das Wort läuft seit ' . $dat['Anzahl'];
    $textCollector[] = ' Tag' . ($dat['Anzahl'] != 1 ? 'en.' : '.');
    if ($dat['Last'])
@@ -639,7 +521,7 @@ Versuche es morgen noch einmal!<br><br><a href="' . $formAction . '" class="btn"
     }
     else
     {
-     $textCollector[] = '<span>' . $moeglicheBuchstaben[$a] . '</span>';
+     $textCollector[] = '<span title="Buchstabe gesperrt!">' . $moeglicheBuchstaben[$a] . '</span>';
     }
     $textCollector[] = '</p><!--/p4letter-->';
    }
@@ -684,32 +566,35 @@ Versuche es morgen noch einmal!<br><br><a href="' . $formAction . '" class="btn"
    
    
    #### START Die letzten X Löser anzeigen.
-   $query->clear()->select('*')->from($hangomat_liste)->order($db->qn('Id') . ' DESC');
-   $db->setQuery($query, 0, $loeanz);
-   $loeser = $db->loadObjectList();
-   
-   $textCollector = array('<div class="div4letzte-loeser">');
-   $textCollector[] = '<h5>Die letzten ' . $loeanz . ' Sieger</h5>';
-   if ($loeser)
+   if ( ($loeanz = (int) $hmconfig->get('loeanz', 10)) && $loeanz > 0)
    {
-    $textCollector[] = '<ul class="list-striped">';
-    foreach ($loeser as $i => $sieger)
+    $query->clear()->select('*')->from($hangomat_liste)->order($db->qn('Id') . ' DESC');
+    $db->setQuery($query, 0, $loeanz);
+    $loeser = $db->loadObjectList();
+    
+    $textCollector = array('<div class="div4letzte-loeser">');
+    $textCollector[] = '<h5>Die letzten ' . $loeanz . ' Sieger</h5>';
+    if ($loeser)
     {
-     $textCollector[] = '<li>';
-     $textCollector[] = '<span class="siegerName">' . $sieger->Name . '</span>';
-     $textCollector[] = '<br />löste <span class="siegerName">' . $sieger->Wort . '</span>';
-     $textCollector[] = '<br /> nach <span class="siegerName">' . $sieger->Anzahl . '</span> Tag' . ($sieger->Anzahl > 1 ? 'en' : '');
-     $textCollector[] = ' am ' . date('d.m.Y', $sieger->Zeit) . '.';
-     $textCollector[] = '</li>';
+     $textCollector[] = '<ul class="list-striped">';
+     foreach ($loeser as $i => $sieger)
+     {
+      $textCollector[] = '<li>';
+      $textCollector[] = '<span class="siegerName">' . $sieger->Name . '</span>';
+      $textCollector[] = '<br />löste <span class="siegerName">' . $sieger->Wort . '</span>';
+      $textCollector[] = '<br /> nach <span class="siegerName">' . $sieger->Anzahl . '</span> Tag' . ($sieger->Anzahl > 1 ? 'en' : '');
+      $textCollector[] = ' am ' . date('d.m.Y', $sieger->Zeit) . '.';
+      $textCollector[] = '</li>';
+     }
+     $textCollector[] = '</ul>';
     }
-    $textCollector[] = '</ul>';
+    else
+    {
+     $textCollector[] = '<p>Keine in Datenbank gefunden.</p>';
+    }
+    $textCollector[] = '</div><!--/div4letzte-loeser-->';
+    $Text .= implode("\n", $textCollector);
    }
-   else
-   {
-    $textCollector[] = '<p>Keine in Datenbank gefunden.</p>';
-   }
-   $textCollector[] = '</div><!--/div4letzte-loeser-->';
-   $Text .= implode("\n", $textCollector);
    #### ENDE Die letzten X Löser anzeigen.
 
   }
@@ -717,7 +602,7 @@ Versuche es morgen noch einmal!<br><br><a href="' . $formAction . '" class="btn"
 }
 else
 {
- $Text = "Kein Wort in der Datenbank.<br><br>" . $jehmtt;
+ $Text = '<p class="alert alert-info alerter">Zur Zeit befindet sich leider kein zu lösendes Wort in der Hangomat-Datenbank.</p>';
 }
 
 if (!$Loesungswort)
@@ -863,10 +748,27 @@ function insertTestData($dbprefix, $db)
 function addCSSJS($formAction)
 {
  $doc = JFactory::getDocument();
- $css = '
+
+ $currentDir = basename(__DIR__);
+ $cssFile = JHtml::_('stylesheet', $currentDir . '/hangomat.css', array('relative' => true, 'pathOnly' => 'true'));
+ if ($cssFile)
+ {
+  JHtml::_('stylesheet', $currentDir . '/hangomat.css', array('version' => 'auto', 'relative' => true));
+ }
+ else
+ {
+  $css = '
 .div4whole-hangomat{
-	width: 100%;
-	text-align: center;
+ width: 100%;
+ text-align: center;
+}
+.div4whole-hangomat h5
+{
+ margin-top: 24px;
+}
+.div4whole-hangomat h4
+{
+ margin-top: 24px;
 }
 .alerter{
  font-size:1.2em;
@@ -921,9 +823,11 @@ span.span4letter{
 .aktuellesWort{
  font-weight: bold;
  font-size: 1.5em;
+ line-height: 2em;
 }
  ';
- $doc->addStyleDeclaration($css);
+  $doc->addStyleDeclaration($css);
+ }
  
  $js = '
  function jehmloesch(id)
