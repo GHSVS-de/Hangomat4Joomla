@@ -41,3 +41,20 @@ $hmconfig['createHangomatTables'] = true;
 #### Beachten:  Wenn die Tabellen bereits Daten enthalten,
 ####  gibt's Fehlermeldungen auf der Seite. Dann hier wieder auf false setzen.
 $hmconfig['insertTestData'] = false;
+
+
+#### ???NICHT DIE JOOMLA-DATENBANK VERWENDEN???
+####
+#### !HAUPTSCHALTER!
+#### Setzen Sie useExternalDB auf true, um eine andere Datenbank zu verwenden.
+#### Voreinstellung: false für Joomla-Datenbank verwenden.
+$hmconfig['useExternalDB'] = true;
+####
+#### !VERBINDUNGSDATEN!
+#### Geben Sie die Verbindungsdaten für die externe Datenbank ein:
+$hmconfig['dbprefix'] = '';
+$hmconfig['host'] = 'localhost';
+$hmconfig['user'] = '';
+$hmconfig['password'] = '';
+$hmconfig['database'] = '';
+$hmconfig['driver'] = 'mysqli';

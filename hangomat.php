@@ -4,7 +4,7 @@
  * ###    Hang-o-Mat v. 2.5   ###   Copyright Jan Erdmann @ http://www.je0.de   ###
  * ################################################################################
  * @edit 2016-08-30 for Joomla 3.6.2 by ghsvs.de
- * @version 2017.06.16 (tested with Joomla 3.7.3 beta)
+ * @version 2017.06.30 (tested with Joomla 3.7.3 beta)
 */
 ?>
 <?php
@@ -36,7 +36,6 @@ $heuteTag = date('l');
 $session = JFactory::getSession();
 $input = JFactory::getApplication()->input;
 $formAction = htmlspecialchars(JUri::getInstance()->toString());
-$dbprefix = trim($hmconfig->get('dbprefix', '#__'));
 
 // Read POST datas from forms.
 $hmcook = trim($input->post->get('hmcook', '', 'string'));
@@ -89,7 +88,34 @@ $jehmtt .= '</p>';
 addCSSJS($formAction);
 
 // Init db query variable
-$db = JFactory::getDbo();
+$useExternalDB = $hmconfig->get('useExternalDB') === true;
+$dbprefix = ($useExternalDB ? trim($hmconfig->get('dbprefix')) : '#__');
+
+if ($useExternalDB)
+{
+ $options = array(
+  'driver' => trim($hmconfig->get('driver', 'mysqli')),
+  'host' => trim($hmconfig->get('host', 'localhost')),
+  'user' => trim($hmconfig->get('user', '')), 
+  'password' => trim($hmconfig->get('password', '')),
+  'database' => trim($hmconfig->get('database', '')),
+  'prefix' => $dbprefix
+ );
+ $db = JDatabaseDriver::getInstance($options);
+ try
+ {
+  $tables = $db->getTableList();
+ }
+ catch (Exception $e)
+ {
+  echo '<p class="alert alert-error alerter" style="font-weight:bold">Laut Konfiguration soll NICHT die Joomla-Datenbank für Hangomat verwendet werden. "useExternalDB" steht auf true.<br /><br />Leider konnte die "externe" Hangomat-Datenbank nicht verbunden werden.<br /><br />Prüfen Sie die Eingaben in der Datei hangomat-configuration.php ab Eintrag "useExternalDB".</p>';
+  return;
+ }
+}
+else
+{
+ $db = JFactory::getDbo();
+}
 $query = $db->getQuery(true);
 
 // Create db tables.
@@ -380,6 +406,7 @@ Versuche es morgen noch einmal!<br><br><a href="' . $formAction . '" class="btn"
 
     $db->setQuery($query)->execute();
    }
+
   }
   echo '<form method="post" action="' . $formAction . '" name="loesen">';
   echo $Text . '</form>';
@@ -451,7 +478,6 @@ Versuche es morgen noch einmal!<br><br><a href="' . $formAction . '" class="btn"
    }
   } // end // User may vote for a letter.
  } // end Voting für einzelnen Buchstaben?
-
 
 
  // Anzeige bei Erstbesuch.
@@ -609,7 +635,6 @@ if (!$Loesungswort)
 {
  echo '<form method="post" action="' . $formAction . '" name="hmform"><input type="hidden" value="" name="hmcook">';
  echo $Text;
- 
 
  echo '<p>' . $jehmtt . '</p>';
  
