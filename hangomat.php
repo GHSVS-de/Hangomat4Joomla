@@ -4,7 +4,7 @@
  * ###    Hang-o-Mat v. 2.5   ###   Copyright Jan Erdmann @ http://www.je0.de   ###
  * ################################################################################
  * @edit 2016-08-30 for Joomla 3.6.2 by ghsvs.de
- * @version 2017.06.30 (tested with Joomla 3.7.3 beta)
+ * @version 2017.07.10 (tested with Joomla 3.7.3 beta)
 */
 ?>
 <?php
@@ -506,13 +506,13 @@ Versuche es morgen noch einmal!<br><br><a href="' . $formAction . '" class="btn"
    $textCollector[] = 'Das gesuchte Wort hat ' . $wortlaenge . ' Buchstaben.';
    $textCollector[] = '<br />Das Wort läuft seit ' . $dat['Anzahl'];
    $textCollector[] = ' Tag' . ($dat['Anzahl'] != 1 ? 'en.' : '.');
-   if ($dat['Last'])
-   {
-    // $textCollector[] = '<br />Letzter ausgewerteter Buchstabe: ' . $dat['Last'];
-   }
    if ($dat['LWort'])
    {
     $textCollector[] = '<br />Letzter gelöster Begriff: ' . $dat['LWort'] . '.';
+   }
+   if ($dat['Last'])
+   {
+    $textCollector[] = '<br />Letzter bewerteter Buchstabe: ' . $dat['Last'];
    }
    $textCollector[] = '</p>';
    $textCollector[] = '</div><!--/div4zu-loesendes-wort-->';
