@@ -41,7 +41,7 @@ $hmconfig['insertTestData'] = false;
 #### !HAUPTSCHALTER!
 #### Setzen Sie useExternalDB auf true, um eine andere Datenbank zu verwenden.
 #### Voreinstellung: false für Joomla-Datenbank verwenden.
-$hmconfig['useExternalDB'] = true;
+$hmconfig['useExternalDB'] = false;
 ####
 #### !VERBINDUNGSDATEN!
 #### Geben Sie die Verbindungsdaten für die externe Datenbank ein:
