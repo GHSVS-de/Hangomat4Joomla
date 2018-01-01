@@ -27,13 +27,6 @@ $hmconfig['loeanz'] = 10;
 $hmconfig['moeglicheBuchstaben'] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 
-#### ???HANGOMAT-TABELLEN ANLEGEN, WENN SIE NOCH NICHT EXISTIEREN???
-#### !Voreinstellung: true für JA!
-#### Kann dauerhaft auf true bleiben.
-#### Setzen Sie auf false für NEIN.
-$hmconfig['createHangomatTables'] = true;
-
-
 #### ???HANGOMAT-TABELLEN MIT TESTDATEN BEFÜLLEN???
 #### Wenn man Hangomat das erste mal verwendet, kann das hilfreich sein.
 #### !Voreinstellung: false für NEIN!
