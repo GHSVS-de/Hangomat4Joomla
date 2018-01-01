@@ -25,6 +25,8 @@
  padding:0;
  margin:0;
  border: 2px solid gray;
+	font-weight:bold;
+	/*font-family: Monaco, Menlo, Consolas, "Courier New", monospace;*/
 }
 .div4whole-hangomat .p4letter span{
  border-color: red;
@@ -32,8 +34,10 @@
  background-color: red;
 }
 .div4whole-hangomat .p4letter input{
- border-color: green;
- background-color: green;
+ /* border-color: green;
+ background-color: green; */
+ border-color: #0088CC;
+ background-color: #0088CC;
  color: white;
 }
 .div4whole-hangomat .div4stimmen-heute p{
@@ -50,23 +54,27 @@
  text-align: center;
 }
 .div4whole-hangomat span.span4letter{
- fon-weight: bold;
+ font-weight: bold;
  background-color: gray;
  color:white;
 }
 .div4whole-hangomat .siegerName{
  font-weight: bold;
  font-size: 1.2em;
- color: green;
+ /*color: green; */
+ color: #0088CC;
 }
 .div4whole-hangomat .siegerWort{
- color: green;
+ /*color: green; */
+ color: #0088CC;
 }
 .div4whole-hangomat .div4letzte-loeser li{
  text-align:center;
 }
 .div4whole-hangomat .aktuellesWort{
  font-weight: bold;
- font-size: 1.2em;
- line-height: 2em;
+ /*font-size: 1.2em;
+ line-height: 2em;*/
+ font-size: 1.8em;
+ line-height: 3.0em;
 }
