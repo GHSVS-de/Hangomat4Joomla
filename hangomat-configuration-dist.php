@@ -21,9 +21,6 @@ $hmconfig['loeanz'] = 10;
 
 
 #### ???ERLAUBTE BUCHSTABEN???
-#### Beachten: Das ist aus dem Original-Hangomat so übernommen.
-#### Ich habe nie getestet, was für Auswirkungen es hat, wenn
-####  man hier was ändert.
 $hmconfig['moeglicheBuchstaben'] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 
@@ -32,7 +29,7 @@ $hmconfig['moeglicheBuchstaben'] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 #### !Voreinstellung: false für NEIN!
 #### Setzen Sie auf true, wenn Tabellen befüllt werden sollen.
 #### Beachten:  Wenn die Tabellen bereits Daten enthalten,
-####  gibt's Fehlermeldungen auf der Seite. Dann hier wieder auf false setzen.
+####  gibt's eine Nachricht auf der Seite. Dann hier wieder auf false setzen.
 $hmconfig['insertTestData'] = false;
 
 
