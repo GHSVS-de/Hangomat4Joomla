@@ -10,7 +10,7 @@
 <?php
 defined('_JEXEC') or die;
 
-$hangoHelper = new hangomatHelper($module->id);
+$hangoHelper = new hangoHelper($module->id);
 
 if ($hangoHelper->stopExecution)
 {
@@ -357,7 +357,7 @@ $html[] = '</div><!--/div4whole-hangomat-->';
 echo implode("\n", $html);
 ?>
 <?php
-class hangomatHelper
+class hangoHelper
 {
 	private $hangomat = 'hangomat';
 	private $hangomat_ip = 'hangomat_ip';
