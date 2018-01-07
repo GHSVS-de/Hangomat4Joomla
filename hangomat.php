@@ -1778,7 +1778,7 @@ class hangomatHelper
 	{
 		if ($this->db->getServerType() != 'mysql')
 		{
-			JFactory::getApplication()->enqueueMessage(JText::sprintf('HANGOMAT_DB_DRIVER_NOT_SUPPORTED', $this->db->serverType), 'error');
+			JFactory::getApplication()->enqueueMessage(JText::sprintf('HANGOMAT_DB_DRIVER_NOT_SUPPORTED', $this->db->getServerType()), 'error');
 			return false;
 		}
 		return true;
