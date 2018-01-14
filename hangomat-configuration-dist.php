@@ -48,3 +48,10 @@ $hmconfig['user'] = '';
 $hmconfig['password'] = '';
 $hmconfig['database'] = '';
 $hmconfig['driver'] = 'mysqli';
+
+
+#### ???SPIELMODUS???
+####
+#### normal: Das altbekannte Verhalten. Pro Tag wird nur 1 Buchstabe ausgewertet.
+#### schnell: ALLE gevoteten Buchstaben werden zum Tagwechsel ausgewertet und deeaktiviert.
+$hmconfig['spielmodus'] = 'normal';
