@@ -78,3 +78,24 @@
  font-size: 1.8em;
  line-height: 3.0em;
 }
+.div4whole-hangomat .list-striped{
+	list-style: none;
+	line-height: 18px;
+	text-align: left;
+	vertical-align: middle;
+	border-top: 1px solid #ddd;
+	margin-left: 0;
+	padding-left: 0;
+}
+.div4whole-hangomat .list-striped li:nth-child(2n+1){
+	background-color: #f9f9f9;
+}
+.div4whole-hangomat .list-striped li{
+	border-bottom: 1px solid #ddd;
+	background-color: #fff;
+	padding: 8px;
+}
+.div4whole-hangomat input[type="submit"],
+.div4whole-hangomat input[type="button"]{
+	cursor: pointer;
+}
