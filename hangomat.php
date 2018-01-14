@@ -1166,7 +1166,7 @@ class hangoHelper
 		Checks for missing letters, e.g. because there are new ones in configuration.
 		After a new currentItem has been created.
 	*/
- private function updateCurrentWort()
+	private function updateCurrentWort()
 	{
 		$update = false;
 		$characters = $this->characters_array;
@@ -1283,8 +1283,6 @@ class hangoHelper
 	*/
 	private function evaluateLastVotes()
 	{
-
-
 		$update = false;
 		$characters = $this->characters_array;
 		$Buchstaben = $this->Buchstaben_array;
