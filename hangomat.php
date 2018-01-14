@@ -38,7 +38,7 @@ if ($loggedIn)
 		$allowed = $hangoHelper->checkAllowedCharacters($hangowort);
 		if ($allowed !== true)
 		{
-			$html[] = '<p class="alert alert-error alerter">';
+			$html[] = '<p class="alert alert-error  alert-danger alerter">';
 			$html[] = JText::sprintf('HANGOMAT_CHARACTER_NOT_ALLOWED',
 				$hangowort,
 				$allowed,
@@ -143,7 +143,7 @@ if ($hangoHelper->winnerFormShow === true)
 elseif ($hangoHelper->winnerFormShow === false)
 {
 	$userFormShow = false;
-	$html[] = '<p class="alert alert-error alerter">';
+	$html[] = '<p class="alert alert-error alert-danger alerter">';
 	$html[] = JText::sprintf('HANGOMAT_WORD_WRONGLY_SOLVED', $hangoHelper->Loesungswort, $hangoHelper->formAction);
 	$html[] = '</p>';
 }
@@ -151,7 +151,7 @@ elseif ($hangoHelper->winnerFormShow === false)
 elseif ($hangoHelper->winnerFormShow === -1)
 {
 	$userFormShow = false;
-	$html[] = '<p class="alert alert-error alerter">';
+	$html[] = '<p class="alert alert-error alert-danger alerter">';
 	$html[] = JText::sprintf('HANGOMAT_WORD_BLOCKED', $hangoHelper->formAction);
 	$html[] = '</p>';
 }
@@ -159,7 +159,7 @@ elseif ($hangoHelper->winnerFormShow === -1)
 elseif ($hangoHelper->winnerFormShow === -2)
 {
 	$userFormShow = false;
-	$html[] = '<p class="alert alert-error alerter">';
+	$html[] = '<p class="alert alert-error alert-danger alerter">';
 	$html[] = JText::sprintf('HANGOMAT_SYSTEM_WAS_FASTER', $hangoHelper->formAction);
 	$html[] = '</p>';
 }
@@ -178,7 +178,7 @@ if ($hangoHelper->buchstabeState === true)
 elseif ($hangoHelper->buchstabeState === false)
 {
 	$userFormShow = false;
-	$html[] = '<p class="alert alert-error alerter">';
+	$html[] = '<p class="alert alert-error alert-danger alerter">';
 	$html[] = JText::sprintf('HANGOMAT_BUCHSTABE_BLOCKED', $hangoHelper->Buchstabe, $hangoHelper->formAction);
 	$html[] = '</p>';
 }
@@ -186,7 +186,7 @@ elseif ($hangoHelper->buchstabeState === false)
 elseif (is_string($hangoHelper->buchstabeState) && mb_strlen($hangoHelper->Buchstabe) == 1)
 {
 	$userFormShow = false;
-	$html[] = '<p class="alert alert-error alerter">';
+	$html[] = '<p class="alert alert-error alert-danger alerter">';
 	$html[] = JText::sprintf('HANGOMAT_BUCHSTABE_USER_BLOCKED', $hangoHelper->buchstabeState, $hangoHelper->formAction);
 	$html[] = '</p>';
 }
@@ -194,7 +194,7 @@ elseif (is_string($hangoHelper->buchstabeState) && mb_strlen($hangoHelper->Buchs
 elseif ((int) $hangoHelper->buchstabeState === -2)
 {
 	$userFormShow = false;
-	$html[] = '<p class="alert alert-error alerter">';
+	$html[] = '<p class="alert alert-error alert-danger alerter">';
 	$html[] = JText::sprintf('HANGOMAT_SYSTEM_WAS_FASTER', $hangoHelper->formAction);
 	$html[] = '</p>';
 }
@@ -202,7 +202,7 @@ elseif ((int) $hangoHelper->buchstabeState === -2)
 
 if (!$hangoHelper->items && !$loggedIn)
 {
-	$html[] = '<p class="alert alert-error alerter">' . JText::_('HANGOMAT_NO_WORDS_IN_DB') . '</p>';
+	$html[] = '<p class="alert alert-error alert-danger alerter">' . JText::_('HANGOMAT_NO_WORDS_IN_DB') . '</p>';
 	$userFormShow = false;
 }
 
