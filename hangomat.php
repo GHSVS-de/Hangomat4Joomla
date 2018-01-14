@@ -38,7 +38,7 @@ if ($loggedIn)
 		$allowed = $hangoHelper->checkAllowedCharacters($hangowort);
 		if ($allowed !== true)
 		{
-			$html[] = '<p class="alert alert-error  alert-danger alerter">';
+			$html[] = '<p class="alert alert-error alert-danger alerter">';
 			$html[] = JText::sprintf('HANGOMAT_CHARACTER_NOT_ALLOWED',
 				$hangowort,
 				$allowed,
@@ -392,6 +392,7 @@ class hangoHelper
 	public $Buchstabe;
 	public $buchstabeState;
 	// Lösungsversuche ENDE.
+	private $spielmodus;
 
 	public function __construct($moduleId)
 	{
@@ -460,7 +461,17 @@ class hangoHelper
 			$this->stopExecution = true;
 			return;
 		}
-		
+
+		$this->spielmodus = 'evaluateLastVotes_' . strtolower(trim($this->hmconfig->get('spielmodus', 'normal')));
+		if (!method_exists($this, $this->spielmodus))
+		{
+			JFactory::getApplication()->enqueueMessage(
+				JText::sprintf('HANGOMAT_SPIELMODUS_NOT_EXISTS',
+				$this->spielmodus
+			), 'warning');
+			$this->spielmodus = 'evaluateLastVotes_normal';
+		}
+
 		$this->heuteTag = date('Ymd');
 		
 		// Load/Create hangomat_ip *array* of current User. ($this->currentUser).
@@ -1155,7 +1166,7 @@ class hangoHelper
 		Checks for missing letters, e.g. because there are new ones in configuration.
 		After a new currentItem has been created.
 	*/
- private function updateCurrentWort()
+	private function updateCurrentWort()
 	{
 		$update = false;
 		$characters = $this->characters_array;
@@ -1190,6 +1201,7 @@ class hangoHelper
 			if (!trim($value) || $value == '_') continue;
 			if (!array_key_exists($value, $voted))
 			{
+				// z.B. $voted['K'] = 12; 12 ist nur index für array_flip.
 				$voted[$value] = $voted ? (max($voted) + 1) : 0;
 				$update = true;
 			}
@@ -1279,48 +1291,52 @@ class hangoHelper
 		// Collector for voted letters.
 		$voted = $this->voted_array;
 
-		foreach ($characters as $key => $value)
+		$Last = $this->currentItem['Last'];
+
+		// Kein einziger Tipp?		
+		if (!max($characters))
 		{
-
-			// Somebody voted for a character yesterday.
-			if ($value)
+			$randomCharacter = '';
+			$i = 10000;
+			$j = 0;
+			while($j != $i)
 			{
-				$update = true;
-
-				// Reset.
-				$characters[$key] = 0;
-				
-				// Otherwise following array_flip will flop.
-				$voted[$key] = $voted ? (max($voted) + 1) : 0;
-
-				// Bin nicht sicher, ob hier oder unten. Im Original ist es unten.
-				unset($Buchstaben[$key]);
-
-				if (in_array($key, $this->Wort_array))
+				$randomIndex = rand(min($Buchstaben), max($Buchstaben));
+				$randomCharacter = array_search($randomIndex, $Buchstaben);
+				if (!array_key_exists($randomCharacter, $voted))
 				{
-					// Bin nicht sicher, ob hier oder oben. Im Original ist es hier.
-					##unset($Buchstaben[$key]);
-
-					// Replace underscores in $SWort.
-					foreach ($this->Wort_array as $i => $character)
-					{
-						if ($character == $key)
-						{
-							$SWort[$i] = $Last = $character;
-						}
-					}
+					break;
 				}
+				$randomCharacter = '';
+				$j++;
 			}
+			if (!$randomCharacter)
+			{
+				// Hilfloser Fallback. Irgendwas.
+				$randomCharacter = array_search(rand(min($Buchstaben), max($Buchstaben)), $Buchstaben);
+
+			}
+			$characters[$randomCharacter] = 1;
 		}
+
+		$spielmodus = $this->spielmodus;
+		$this->$spielmodus(
+			$update,
+			$characters,
+			$Buchstaben,
+			$SWort,
+			$voted,
+			$Last
+		);
 
 		// Always Update because of always changed Tag and Anzahl.
 		$Anzahl = $this->currentItem['Anzahl'] + $this->calculateDays($this->currentItem['Tag']);
 
 		$query = $this->db->getQuery(true)
-		->update($this->db->qn($this->hangomat))
-		->where($this->db->qn('Id') . ' = ' . (int) $this->currentItem['Id'])
-		->set($this->db->qn('Tag') . ' = ' . $this->db->q($this->heuteTag))
-		->set($this->db->qn('Anzahl') . ' = ' . $this->db->q($Anzahl));
+			->update($this->db->qn($this->hangomat))
+			->where($this->db->qn('Id') . ' = ' . (int) $this->currentItem['Id'])
+			->set($this->db->qn('Tag') . ' = ' . $this->db->q($this->heuteTag))
+			->set($this->db->qn('Anzahl') . ' = ' . $this->db->q($Anzahl));
 
 		if ($update)
 		{
@@ -1352,7 +1368,104 @@ class hangoHelper
 
 		return true;
 	}
+
 	
+	/**
+	Modus 'normal'.
+	Wie schon immer.
+	1 Buchstabe pro Tag.
+	*/
+	private function evaluateLastVotes_normal(
+		&$update,
+		&$characters,
+		&$Buchstaben,
+		&$SWort,
+		&$voted,
+		&$Last
+	){	
+		$update = true;
+		$collector = array();
+		$hmmax = 0;
+
+		foreach ($characters as $key => $value)
+		{
+			// Reset.
+			$characters[$key] = 0;
+
+			// number of votes ( = $value) for character ( = $key).
+			if ($value)
+			{
+				$collector[$value][] = $key;
+				if ($value > $hmmax)
+				{
+					$hmmax = $value;
+				}
+			}
+		}
+
+		$randomIndex = rand(0, count($collector[$hmmax]) - 1);
+		$Last = $collector[$hmmax][$randomIndex];
+		unset($Buchstaben[$Last]);
+
+		// Otherwise following array_flip will flop.
+		$voted[$Last] = $voted ? (max($voted) + 1) : 0;
+
+		if (in_array($Last, $this->Wort_array))
+		{
+			// Replace underscores in $SWort.
+			foreach ($this->Wort_array as $i => $character)
+			{
+				if ($character == $Last)
+				{
+					$SWort[$i] = $character;
+				}
+			}
+		}
+	}
+
+	/**
+	Modus 'schnell'. Alle getippten Zeichen auswerten und deaktivieren (rot).
+	*/
+	private function evaluateLastVotes_schnell(
+		&$update,
+		&$characters,
+		&$Buchstaben,
+		&$SWort,
+		&$voted,
+		&$Last
+	){
+		foreach ($characters as $key => $value)
+		{
+			// Somebody voted for this character yesterday.
+			if ($value)
+			{
+				$update = true;
+
+				// Reset.
+				$characters[$key] = 0;
+				
+				// Otherwise following array_flip will flop.
+				$voted[$key] = $voted ? (max($voted) + 1) : 0;
+
+				// Im Modus 0 ALLE gevoteten Zeichen deaktivieren.
+				unset($Buchstaben[$key]);
+				$Last = $key;
+
+				if (in_array($key, $this->Wort_array))
+				{
+					// Replace underscores in $SWort.
+					foreach ($this->Wort_array as $i => $character)
+					{
+						if ($character == $key)
+						{
+							$SWort[$i] = $character;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	private function setNewCurrentItem()
 	{
 		// das erledigt deleteHangowort():
