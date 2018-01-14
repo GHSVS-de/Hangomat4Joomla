@@ -4,7 +4,7 @@
  * ###    Hang-o-Mat v. 2.5   ###   Copyright Jan Erdmann @ http://www.je0.de   ###
  * ################################################################################
  * @edit 2016-08-30 for Joomla 3.6.2 by ghsvs.de
- * @version 2018.01.01 (tested with Joomla 3.8.3)
+ * @version 2018.01.07 (tested with Joomla 4.0.0 dev)
 */
 ?>
 <?php
