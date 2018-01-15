@@ -1562,13 +1562,15 @@ class hangoHelper
 			'Buchstaben',
 			'Wort',
 			'SWort',
-			'characters'
+			'characters',
+			'Tag'
 		);
 		$values =  array(
 			$this->db->q(implode('', $this->moeglicheBuchstaben_array)),
 		 	$this->db->q($Wort),
 			$this->db->q($SWort),
-			$this->db->q(json_encode($characters))
+			$this->db->q(json_encode($characters)),
+			$this->db->q($this->heuteTag)
 		);
 		$query = $this->db->getQuery(true);
 		$query->insert($this->db->qn($this->hangomat))
