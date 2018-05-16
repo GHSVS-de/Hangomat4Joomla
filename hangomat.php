@@ -132,6 +132,9 @@ if ($hangoHelper->winnerFormShow === true)
 	$html[] = '<p class="alert alert-success alerter">';
 	$html[] = JText::sprintf('HANGOMAT_WORD_CORRECTLY_SOLVED', $hangoHelper->Loesungswort);
 	$html[] = '</p>';
+	$html[] = '<p class="hangomatDsgvoHint">';
+	$html[] = JText::_('HANGOMAT_DSGVO_HINT');
+	$html[] = '</p>';
 	$html[] = '<p>Name:<br /><input type="text" name="hm_name" maxlength=50></p>';
 	$html[] = '<p>E-Mail:<br /><input type="email" name="hm_mail" maxlength=50></p>';
 	$html[] = '<p><input type="submit" value="Eintragen"></p>';
