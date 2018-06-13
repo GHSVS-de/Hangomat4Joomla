@@ -1041,7 +1041,7 @@ class hangoHelper
 				return false;
 			}
 		} // if $oldTableStructure end
-		$this->needsNoUpdate[] = array($this->hangomat, $this->hangomat_ip, $this->hangomat_liste);
+		$this->needsNoUpdate = array($this->hangomat, $this->hangomat_ip, $this->hangomat_liste);
 		return true;
 	}
 	
