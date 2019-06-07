@@ -4,7 +4,7 @@
  * ###    Hang-o-Mat v. 2.5   ###   Copyright Jan Erdmann @ http://www.je0.de   ###
  * ################################################################################
  * @edit 2016-08-30 for Joomla 3.6.2 by ghsvs.de
- * @version 2018.05.17 (tested with Joomla 4.0.0 dev)
+ * @version 2019.06.07 (tested with Joomla 3.9.7-dev, PHP 7.3)
 */
 ?>
 <?php
@@ -33,7 +33,7 @@ if ($loggedIn)
 	$html[] = '<h4>' . JText::_('HANGOMAT_ADMIN_AREA') . '</h4>';
 	$refreshItems = false;
 	// Admin has entered new word. Save in db!
-	if ( ($hangowort = trim(mb_strtoupper($hangoHelper->input->get('hangowort', '', 'string')))) )
+	if ( ($hangowort = trim($hangoHelper->mbStrToUpper($hangoHelper->input->get('hangowort', '', 'string')))) )
 	{
 		$allowed = $hangoHelper->checkAllowedCharacters($hangowort);
 		if ($allowed !== true)
@@ -521,7 +521,7 @@ class hangoHelper
 			{
 				if (
 					$this->Loesungswort
-						= trim(mb_strtoupper($this->input->get('Loesungswort', '', 'STRING')))
+						= trim($this->mbStrToUpper($this->input->get('Loesungswort', '', 'STRING')))
 				){
 					// Block it if evaluateLastVotes has happend at same time and word already solved.
 					if ($this->currentItem['state'] == 1)
@@ -553,7 +553,7 @@ class hangoHelper
 					}
 				}
 				// User tried to solve a Buchstabe.
-				elseif ($this->Buchstabe = trim(mb_strtoupper($this->input->get('Buchstabe', '', 'STRING'))))
+				elseif ($this->Buchstabe = trim($this->mbStrToUpper($this->input->get('Buchstabe', '', 'STRING'))))
 				{
 					// Block it if evaluateLastVotes has happend at same time and word already solved.
 					if ($this->currentItem['state'] == 1)
@@ -1914,6 +1914,43 @@ class hangoHelper
 			$ret[] = mb_substr($str, $i, 1, 'UTF-8');
 		}
 		return $ret;
+	}
+
+	/**
+	 * Since PHP7.3 mb_strtoupper(ß) becomes SS instead of expected ß.
+	 */
+	public function mbStrToUpper($str)
+	{
+		if (!mb_strlen($str))
+		{
+			return $str;
+		}
+
+		if (
+			version_compare(PHP_VERSION, '7.3', '>=')
+			&& mb_strlen($str) !== mb_strlen(mb_strtoupper($str))
+		){
+			$retStr = '';
+
+			$str = $this->str_split_unicode($str, $l = 0);
+			
+			foreach ($str as $key => $character)
+			{
+				if (mb_strlen($character) !== mb_strlen(mb_strtoupper($character)))
+				{
+					$retStr .= $character;
+					continue;
+				}
+
+				$retStr .= mb_strtoupper($character);
+			}
+
+			return $retStr;
+		}
+		else
+		{
+			return mb_strtoupper($str);
+		}
 	}
 
 	private function addCSS()
