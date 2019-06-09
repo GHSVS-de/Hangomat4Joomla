@@ -10,6 +10,14 @@
 <?php
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Factory;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Mail\MailHelper;
+use Joomla\CMS\Uri\Uri;
+use Joomla\Database\DatabaseDriver;
+use Joomla\Registry\Registry;
+
 $hangoHelper = new hangoHelper($module->id);
 
 if ($hangoHelper->stopExecution)
@@ -30,7 +38,7 @@ if ($loggedIn)
 	$userFormShow = false;
 	$html[] = '<form action="' . $hangoHelper->formAction . '" method="post" name="hango" class=form4admin>';
 	$html[] = '<div class="div4admin">';
-	$html[] = '<h4>' . JText::_('HANGOMAT_ADMIN_AREA') . '</h4>';
+	$html[] = '<h4>' . Text::_('HANGOMAT_ADMIN_AREA') . '</h4>';
 	$refreshItems = false;
 	// Admin has entered new word. Save in db!
 	if ( ($hangowort = trim($hangoHelper->mbStrToUpper($hangoHelper->input->get('hangowort', '', 'string')))) )
@@ -39,7 +47,7 @@ if ($loggedIn)
 		if ($allowed !== true)
 		{
 			$html[] = '<p class="alert alert-error alert-danger alerter">';
-			$html[] = JText::sprintf('HANGOMAT_CHARACTER_NOT_ALLOWED',
+			$html[] = Text::sprintf('HANGOMAT_CHARACTER_NOT_ALLOWED',
 				$hangowort,
 				$allowed,
 				implode(', ', $hangoHelper->moeglicheBuchstaben_array)
@@ -52,7 +60,7 @@ if ($loggedIn)
 			$refreshItems = true;
 		}
 	}
-	
+
 	// Delete db entry?
 	if ( ($Hangodel = (int) $hangoHelper->input->get('Hangodel')))
 	{
@@ -75,7 +83,7 @@ if ($loggedIn)
 	{
 		$hangoHelper->getCurrentItem($refreshItems);
 	}
-	
+
 	if ($hangoHelper->items)
 	{
 		$html[] = '<ul class="list-striped">';
@@ -95,25 +103,25 @@ if ($loggedIn)
 	}
 	else
 	{
-		$html[] = '<p>' . JText::_('HANGOMAT_NO_WORDS_IN_DB') . '</p>';
+		$html[] = '<p>' . Text::_('HANGOMAT_NO_WORDS_IN_DB') . '</p>';
 	}
 
-	$html[] = '<h5>' . JText::_('HANGOMAT_CREATE_NEW_WORD') . '</h5>';
+	$html[] = '<h5>' . Text::_('HANGOMAT_CREATE_NEW_WORD') . '</h5>';
 	$html[] = '<p><input type="text" name="hangowort" value=""><br />';
 	$html[] = '<input type="submit" value="schreiben" name="hangwort"></p>';
 
-	$html[] = '<h5>' . JText::_('HANGOMAT_DELETE_YOUR_IP') . '</h5>';
+	$html[] = '<h5>' . Text::_('HANGOMAT_DELETE_YOUR_IP') . '</h5>';
 	$html[] = '<p><input type="submit" value="lösche Deine IP" name="deleteip" class="btn-danger"></p>';
 
-	$html[] = '<h5>' . JText::_('HANGOMAT_DELETE_ALL_IPS') . '</h5>';
+	$html[] = '<h5>' . Text::_('HANGOMAT_DELETE_ALL_IPS') . '</h5>';
 	$html[] = '<p><input type="submit" value="Ip-TabulaRasa" name="deleteAllIps" class="btn-danger"></p>';
 
-	$html[] = '<h5>' . JText::_('HEUTE getippte Buchstaben vorzeitig auswerten') . '</h5>';
+	$html[] = '<h5>' . Text::_('HEUTE getippte Buchstaben vorzeitig auswerten') . '</h5>';
 	$html[] = '<p><input type="submit" value="TagWechsel ausführen" name="simulateTagwechsel" class="btn-danger"></p>';
 
-	$html[] = '<h5>' . JText::_('Abmelden') . '</h5>';
+	$html[] = '<h5>' . Text::_('Abmelden') . '</h5>';
 	$html[] = '<p><input type="button" value="Adminlogout" onclick="jehmlogin(0)"></p>';
-	
+
 	$html[] = '</div><!--/div4admin-->';
 	$html[] = '</form>';
 	$html[] = '<script>document.forms.hango.onkeypress = stopRKey;</script>';
@@ -130,24 +138,24 @@ if ($hangoHelper->winnerFormShow === true)
 	$userFormShow = false;
 	$html[] = '<form method="post" action="' . $hangoHelper->formAction . '" name="winnerForm" class="form4winner">';
 	$html[] = '<p class="alert alert-success alerter">';
-	$html[] = JText::sprintf('HANGOMAT_WORD_CORRECTLY_SOLVED', $hangoHelper->Loesungswort);
+	$html[] = Text::sprintf('HANGOMAT_WORD_CORRECTLY_SOLVED', $hangoHelper->Loesungswort);
 	$html[] = '</p>';
 	$html[] = '<p class="hangomatDsgvoHint">';
-	$html[] = JText::_('HANGOMAT_DSGVO_HINT');
+	$html[] = Text::_('HANGOMAT_DSGVO_HINT');
 	$html[] = '</p>';
 	$html[] = '<p>Name:<br /><input type="text" name="hm_name" maxlength=50></p>';
 	$html[] = '<p>E-Mail:<br /><input type="email" name="hm_mail" maxlength=50></p>';
 	$html[] = '<p><input type="submit" value="Eintragen"></p>';
 	$html[] = '<input type="hidden" name="winnerFormInsertid" value="' . $hangoHelper->winnerFormInsertid . '">';
 	$html[] = '</form><!--/form winnerForm-->';
-	$html[] = '<script>document.forms.winnerForm.onkeypress = stopRKey;</script>';	
+	$html[] = '<script>document.forms.winnerForm.onkeypress = stopRKey;</script>';
 }
 // User has entered word but it is wrong.
 elseif ($hangoHelper->winnerFormShow === false)
 {
 	$userFormShow = false;
 	$html[] = '<p class="alert alert-error alert-danger alerter">';
-	$html[] = JText::sprintf('HANGOMAT_WORD_WRONGLY_SOLVED', $hangoHelper->Loesungswort, $hangoHelper->formAction);
+	$html[] = Text::sprintf('HANGOMAT_WORD_WRONGLY_SOLVED', $hangoHelper->Loesungswort, $hangoHelper->formAction);
 	$html[] = '</p>';
 }
 // User has entered a word but is blocked for today.
@@ -155,7 +163,7 @@ elseif ($hangoHelper->winnerFormShow === -1)
 {
 	$userFormShow = false;
 	$html[] = '<p class="alert alert-error alert-danger alerter">';
-	$html[] = JText::sprintf('HANGOMAT_WORD_BLOCKED', $hangoHelper->formAction);
+	$html[] = Text::sprintf('HANGOMAT_WORD_BLOCKED', $hangoHelper->formAction);
 	$html[] = '</p>';
 }
 // Tagwechsel hat zeitgleich gelöst.
@@ -163,7 +171,7 @@ elseif ($hangoHelper->winnerFormShow === -2)
 {
 	$userFormShow = false;
 	$html[] = '<p class="alert alert-error alert-danger alerter">';
-	$html[] = JText::sprintf('HANGOMAT_SYSTEM_WAS_FASTER', $hangoHelper->formAction);
+	$html[] = Text::sprintf('HANGOMAT_SYSTEM_WAS_FASTER', $hangoHelper->formAction);
 	$html[] = '</p>';
 }
 ############## LOESUNGSWORT ENDE
@@ -174,7 +182,7 @@ if ($hangoHelper->buchstabeState === true)
 {
 	$userFormShow = false;
 	$html[] = '<p class="alert alert-success alerter">';
-	$html[] = JText::sprintf('HANGOMAT_BUCHSTABE_SAVED', $hangoHelper->Buchstabe, $hangoHelper->formAction);
+	$html[] = Text::sprintf('HANGOMAT_BUCHSTABE_SAVED', $hangoHelper->Buchstabe, $hangoHelper->formAction);
 	$html[] = '</p>';
 }
 // Not allowed Buchstabe.
@@ -182,7 +190,7 @@ elseif ($hangoHelper->buchstabeState === false)
 {
 	$userFormShow = false;
 	$html[] = '<p class="alert alert-error alert-danger alerter">';
-	$html[] = JText::sprintf('HANGOMAT_BUCHSTABE_BLOCKED', $hangoHelper->Buchstabe, $hangoHelper->formAction);
+	$html[] = Text::sprintf('HANGOMAT_BUCHSTABE_BLOCKED', $hangoHelper->Buchstabe, $hangoHelper->formAction);
 	$html[] = '</p>';
 }
 // User selected allowed letter but user is blocked for today.
@@ -190,7 +198,7 @@ elseif (is_string($hangoHelper->buchstabeState) && mb_strlen($hangoHelper->Buchs
 {
 	$userFormShow = false;
 	$html[] = '<p class="alert alert-error alert-danger alerter">';
-	$html[] = JText::sprintf('HANGOMAT_BUCHSTABE_USER_BLOCKED', $hangoHelper->buchstabeState, $hangoHelper->formAction);
+	$html[] = Text::sprintf('HANGOMAT_BUCHSTABE_USER_BLOCKED', $hangoHelper->buchstabeState, $hangoHelper->formAction);
 	$html[] = '</p>';
 }
 // Tagwechsel hat zeitgleich gelöst.
@@ -198,14 +206,14 @@ elseif ((int) $hangoHelper->buchstabeState === -2)
 {
 	$userFormShow = false;
 	$html[] = '<p class="alert alert-error alert-danger alerter">';
-	$html[] = JText::sprintf('HANGOMAT_SYSTEM_WAS_FASTER', $hangoHelper->formAction);
+	$html[] = Text::sprintf('HANGOMAT_SYSTEM_WAS_FASTER', $hangoHelper->formAction);
 	$html[] = '</p>';
 }
 ############## BUCHSTABE ENDE
 
 if (!$hangoHelper->items && !$loggedIn)
 {
-	$html[] = '<p class="alert alert-error alert-danger alerter">' . JText::_('HANGOMAT_NO_WORDS_IN_DB') . '</p>';
+	$html[] = '<p class="alert alert-error alert-danger alerter">' . Text::_('HANGOMAT_NO_WORDS_IN_DB') . '</p>';
 	$userFormShow = false;
 }
 
@@ -221,52 +229,52 @@ if ($userFormShow)
 	$html[] = '<div class="div4zu-loesendes-wort">';
 	if ($wortlaenge['spaces'])
 	{
-		$html[] = '<h4>' . JText::_('HANGOMAT_HEADLINE_SOLVE_TEXT') . '</h4>';
+		$html[] = '<h4>' . Text::_('HANGOMAT_HEADLINE_SOLVE_TEXT') . '</h4>';
 	}
 	else
 	{
-		$html[] = '<h4>' . JText::_('HANGOMAT_HEADLINE_SOLVE_WORD') . '</h4>';
+		$html[] = '<h4>' . Text::_('HANGOMAT_HEADLINE_SOLVE_WORD') . '</h4>';
 	}
 	$html[] = '<p class="aktuellesWort">';
 	$html[] = '&nbsp;' . implode('&nbsp;', $hangoHelper->SWort_array) . '&nbsp;';
 	$html[] = '</p><!--/aktuellesWort-->';
-	
+
 	$html[] = '<p class="description">';
-	
+
 	if ($wortlaenge['spaces'])
 	{
-		$html[] = JText::sprintf('HANGOMAT_TEXT_CONTAINS', $wortlaenge['words'], $wortlaenge['letters']);
+		$html[] = Text::sprintf('HANGOMAT_TEXT_CONTAINS', $wortlaenge['words'], $wortlaenge['letters']);
 	}
 	else
 	{
-		$html[] = JText::sprintf('HANGOMAT_WORD_CONTAINS', $wortlaenge['letters']);
-	
+		$html[] = Text::sprintf('HANGOMAT_WORD_CONTAINS', $wortlaenge['letters']);
+
 	}
-	$html[] = '<br />' . JText::sprintf('HANGOMAT_WORDTEXT_DURATION', $hangoHelper->currentItem['Anzahl']);
+	$html[] = '<br />' . Text::sprintf('HANGOMAT_WORDTEXT_DURATION', $hangoHelper->currentItem['Anzahl']);
 
 	if ($hangoHelper->currentItem['LWort'])
 	{
-		$html[] = '<br />' . JText::sprintf('HANGOMAT_LAST_WORT', $hangoHelper->currentItem['LWort']);
+		$html[] = '<br />' . Text::sprintf('HANGOMAT_LAST_WORT', $hangoHelper->currentItem['LWort']);
 	}
 	if ($hangoHelper->currentItem['Last'])
 	{
-		$html[] = '<br />' . JText::sprintf('HANGOMAT_LAST_VOTED_CHARACTER', $hangoHelper->currentItem['Last']);
+		$html[] = '<br />' . Text::sprintf('HANGOMAT_LAST_VOTED_CHARACTER', $hangoHelper->currentItem['Last']);
 	}
 	$html[] = '</p><!--/description-->';
-	
+
 	$html[] = '</div><!--/div4zu-loesendes-wort-->';
 	#### ENDE Zu lösendes Wort (mit Unterstrichen) ausgeben.
-	
+
 	#### START Buchstabenfelder.
 	$html[] = '<div class="div4buchstaben">';
-	$html[] = '<h5>' . JText::_('HANGOMAT_SELECT_A_CHARACTER') . '</h5>';
-	
+	$html[] = '<h5>' . Text::_('HANGOMAT_SELECT_A_CHARACTER') . '</h5>';
+
 	// Alle grundlegend möglichen Buchstaben durchlaufen.
 	$todayVoted = array();
 	foreach ($hangoHelper->characters_array as $letter => $votedCount)
 	{
 		$html[] = '<p class="p4letter">';
-	
+
 		if ($votedCount)
 		{
 			$todayVoted[$letter] = $votedCount;
@@ -277,21 +285,21 @@ if ($userFormShow)
 		}
 		else
 		{
-			$html[] = '<span title="' . JText::sprintf('HANGOMAT_CHARACTER_BLOCKED', $letter) . '">' . $letter . '</span>';
+			$html[] = '<span title="' . Text::sprintf('HANGOMAT_CHARACTER_BLOCKED', $letter) . '">' . $letter . '</span>';
 		}
-	
+
 		$html[] = '</p><!--/p4letter-->';
 	}
-	
+
 	$html[] = '</div><!--/div4buchstaben-->';
 	#### ENDE Buchstabenfelder.
-	
+
 	#### START Heute getippte Buchstaben ausgeben.
 	$html[] = '<div class="div4stimmen-heute">';
-	$html[] = '<h6>' . JText::_('HANGOMAT_ALREADY_VOTED_TODAY') . '</h6>';
+	$html[] = '<h6>' . Text::_('HANGOMAT_ALREADY_VOTED_TODAY') . '</h6>';
 	if (!$todayVoted)
 	{
-		$html[] = '<div>' . JText::_('HANGOMAT_NOBODY_VOTED_TODAY') . '</div>';
+		$html[] = '<div>' . Text::_('HANGOMAT_NOBODY_VOTED_TODAY') . '</div>';
 	}
 	foreach ($todayVoted as $letter => $votedCount)
 	{
@@ -302,13 +310,13 @@ if ($userFormShow)
 	}
 	$html[] = '</div><!--/div4stimmen-heute-->';
 	#### ENDE Heute getippte Buchstaben ausgeben.
-	
+
 	#### START Lösungswort direkt eingeben.
 	$html[] = '<div class="div4loesungswort-eingabe">';
-	$html[] = '<h5>' . JText::_('HANGOMAT_SOLVE_WORD') . '</h5>';
+	$html[] = '<h5>' . Text::_('HANGOMAT_SOLVE_WORD') . '</h5>';
 	$html[] = '<p>';
 	$html[] = '<input type="text" name="Loesungswort"><br />';
-	$html[] = '<input type="submit" value="' . JText::_('HANGOMAT_SUBMIT_SOLVE') . '">';
+	$html[] = '<input type="submit" value="' . Text::_('HANGOMAT_SUBMIT_SOLVE') . '">';
 	$html[] = '</p>';
 	$html[] = '</div><!--/div4loesungswort-eingabe-->';
 	#### ENDE Lösungswort direkt eingeben.
@@ -318,14 +326,14 @@ if ($userFormShow)
 if ($hangoHelper->Liste)
 {
 	$html[] = '<div class="div4letzte-loeser">';
-	$html[] = '<h5>' . JText::sprintf('HANGOMAT_LAST_WINNERS', count($hangoHelper->Liste)) . '</h5>';
+	$html[] = '<h5>' . Text::sprintf('HANGOMAT_LAST_WINNERS', count($hangoHelper->Liste)) . '</h5>';
 	$html[] = '<ul class="list-striped">';
 	foreach ($hangoHelper->Liste as $winner)
 	{
 		$html[] = '<li>';
 		if ($winner['tagwechsel'])
 		{
-			$html[] = JText::sprintf('HANGOMAT_LAST_WINNERS_WINNER_TAGWECHSEL',
+			$html[] = Text::sprintf('HANGOMAT_LAST_WINNERS_WINNER_TAGWECHSEL',
 				$winner['Wort'],
 				$winner['Anzahl'],
 				date('d.m.Y', $winner['Zeit'])
@@ -333,7 +341,7 @@ if ($hangoHelper->Liste)
 		}
 		else
 		{
-			$html[] = JText::sprintf('HANGOMAT_LAST_WINNERS_WINNER',
+			$html[] = Text::sprintf('HANGOMAT_LAST_WINNERS_WINNER',
 				$winner['Name'],
 				$winner['Wort'],
 				$winner['Anzahl'],
@@ -399,7 +407,7 @@ class hangoHelper
 
 	public function __construct($moduleId)
 	{
-		JFactory::getLanguage()->load('hangomat', __DIR__);
+		Factory::getLanguage()->load('hangomat', __DIR__);
 
 		if (file_exists(__DIR__ . '/hangomat-configuration.php'))
 		{
@@ -409,31 +417,31 @@ class hangoHelper
 			{
 				$hmconfig = array();
 			}
-			$this->hmconfig = new Joomla\Registry\Registry($hmconfig);
+			$this->hmconfig = new Registry($hmconfig);
 		}
 		else
 		{
-			JFactory::getApplication()->enqueueMessage(JText::_('HANGOMAT_CONFIGURATION_FILE_NOT_FOUND'), 'error');
+			Factory::getApplication()->enqueueMessage(Text::_('HANGOMAT_CONFIGURATION_FILE_NOT_FOUND'), 'error');
 			$this->stopExecution = true;
 			return;
 		}
-		
+
 		// Create db connection. $this->db and $this->tables.
 		if (!$this->createDb())
 		{
 			$this->stopExecution = true;
-			return;			
+			return;
 		}
-		
+
 		// Only serverType mysql (MySQL, MySQLi, MySQL (PDO)) is currently supported (because of update scripts).
 		if (!$this->is_supported())
 		{
 			$this->stopExecution = true;
-			return;	
+			return;
 		}
-		
+
 		$this->moduleId = $moduleId;
-		
+
 		$Prefix = $this->db->getPrefix();
 		$this->hangomat = $Prefix . $this->hangomat;
 		$this->hangomat_ip = $Prefix . $this->hangomat_ip;
@@ -443,11 +451,11 @@ class hangoHelper
 		if (!$this->allTablesExist() && !$this->createHangomatTables())
 		{
 			$this->stopExecution = true;
-			return;	
+			return;
 		}
 
 		### At this point we are sure that all db tables exist. ###
-		
+
 		// Table structures differ for versions <= 2017.07.10.
 		// Update tables (new columns, collation and more).
 		if (!$this->updateTables())
@@ -457,7 +465,7 @@ class hangoHelper
 		}
 
 		### At this point we are sure that all db tables have updated structure. ###
-		
+
 		// If all tables are empty one can insert test datas.
 		if ($this->hmconfig->get('insertTestData', false) && $this->insertTestData() === false)
 		{
@@ -468,27 +476,27 @@ class hangoHelper
 		$this->spielmodus = 'evaluateLastVotes_' . strtolower(trim($this->hmconfig->get('spielmodus', 'normal')));
 		if (!method_exists($this, $this->spielmodus))
 		{
-			JFactory::getApplication()->enqueueMessage(
-				JText::sprintf('HANGOMAT_SPIELMODUS_NOT_EXISTS',
+			Factory::getApplication()->enqueueMessage(
+				Text::sprintf('HANGOMAT_SPIELMODUS_NOT_EXISTS',
 				$this->spielmodus
 			), 'warning');
 			$this->spielmodus = 'evaluateLastVotes_normal';
 		}
 
 		$this->heuteTag = date('Ymd');
-		
+
 		// Load/Create hangomat_ip *array* of current User. ($this->currentUser).
 		// No db actions here.
 		$this->getCurrentUser();
-		
+
 		// Initial load of $this->currentItem and other items ($this->items).
 		$this->getCurrentItem();
-		
+
 		// Configured characters.
 		$moeglicheBuchstaben = trim($this->hmconfig->get('moeglicheBuchstaben', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'));
 		$this->moeglicheBuchstaben_array = $this->str_split_unicode($moeglicheBuchstaben);
-		
-		$this->input = JFactory::getApplication()->input->post;
+
+		$this->input = Factory::getApplication()->input->post;
 
 		if ($this->currentItem)
 		{
@@ -499,7 +507,7 @@ class hangoHelper
 			}
 
 			// Tagwechsel? Dann setze abgestimmte Buchstaben, die korrekt etc.
-			$simulateTagwechsel = 
+			$simulateTagwechsel =
 				$this->input->get('simulateTagwechsel', '', 'STRING') == 'TagWechsel ausführen'
 				&& $this->getLoggedin();
 
@@ -544,7 +552,7 @@ class hangoHelper
 					{
 						// Explizit false für "Loesungswort, aber falsch".
 						$this->winnerFormShow = false;
-						
+
 						// Zwar komisch, aber war so im Original: Wenn falsches Lösungswort, lösche alle Zeilen der IP => Setze gleich wieder neuen Eintrag mit Try = 1. Das bedeutet, Buchstabe kann erneut versucht werden.
 						$this->currentUser['Vote'] = 0;
 						$this->currentUser['Try'] = 1;
@@ -577,11 +585,11 @@ class hangoHelper
 					else
 					{
 						$this->buchstabeState = true;
-	
+
 						$this->currentUser['Vote'] = 1;
 						$this->currentUser['Buch'] = $this->Buchstabe;
 						$this->updateCurrentUser();
-						
+
 						if (!$this->updateHangomat())
 						{
 							$this->stopExecution = true;
@@ -610,7 +618,7 @@ class hangoHelper
 					}
 				}
 			}
-			
+
 			// Wenn es ein Loesungswort von User war, hatte er Möglichkeit Namen einzugeben.
 			if ($this->input->get('winnerFormInsertid', 0, 'INTEGER'))
 			{
@@ -618,16 +626,16 @@ class hangoHelper
 			}
 		}
 
-		$this->formAction = htmlspecialchars(JUri::getInstance()->toString());
-		
+		$this->formAction = htmlspecialchars(Uri::getInstance()->toString());
+
 		// Get winner list $this->Liste (hangomat_list).
 		$this->getListe();
-		
+
 		// Load CSS and JS in page HEAD.
 		$this->addCSS();
 		$this->addJS();
 	}
-	
+
 	private function createDb()
 	{
 		if ($this->hmconfig->get('useExternalDB') === true)
@@ -635,38 +643,38 @@ class hangoHelper
 			$options = array(
 				'driver' => trim($this->hmconfig->get('driver', 'mysqli')),
 				'host' => trim($this->hmconfig->get('host', 'localhost')),
-				'user' => trim($this->hmconfig->get('user', '')), 
+				'user' => trim($this->hmconfig->get('user', '')),
 				'password' => trim($this->hmconfig->get('password', '')),
 				'database' => trim($this->hmconfig->get('database', '')),
 				'prefix' => trim($this->hmconfig->get('dbprefix'))
 			);
-			$this->db = JDatabaseDriver::getInstance($options);
+			$this->db = DatabaseDriver::getInstance($options);
 			try
 			{
 				$this->tables = $this->db->getTableList();
 			}
 			catch (Exception $e)
 			{
-				JFactory::getApplication()->enqueueMessage(JText::sprintf('HANGOMAT_EXTERNAL_DB_NOT_CONNECTABLE', $e->getCode(), $e->getMessage()), 'error');
+				Factory::getApplication()->enqueueMessage(Text::sprintf('HANGOMAT_EXTERNAL_DB_NOT_CONNECTABLE', $e->getCode(), $e->getMessage()), 'error');
 				return false;
 			}
 		}
 		else
 		{
-			$this->db = JFactory::getDbo();
+			$this->db = Factory::getDbo();
 			try
 			{
 				$this->tables = $this->db->getTableList();
 			}
 			catch (Exception $e)
 			{
-				JFactory::getApplication()->enqueueMessage(JText::sprintf('HANGOMAT_DB_NOT_CONNECTABLE', $e->getCode(), $e->getMessage()), 'error');
+				Factory::getApplication()->enqueueMessage(Text::sprintf('HANGOMAT_DB_NOT_CONNECTABLE', $e->getCode(), $e->getMessage()), 'error');
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 	/**
 	 Check for needed db tables.
 	*/
@@ -683,12 +691,12 @@ class hangoHelper
 	}
 
 	/**
-	
+
 	*/
 	private function createHangomatTables()
 	{
 		$sql = array();
-		
+
 		$tabelle = $this->hangomat;
 		if (!in_array($tabelle, $this->tables))
 		{
@@ -707,8 +715,8 @@ class hangoHelper
 				PRIMARY KEY (`Id`)
 			) ENGINE=InnoDB  DEFAULT CHARSET=utf8;";
 		}
-	
-		$tabelle = $this->hangomat_ip; 
+
+		$tabelle = $this->hangomat_ip;
 		if (!in_array($tabelle, $this->tables))
 		{
 			$sql[$tabelle] = "CREATE TABLE " . $this->db->qn($tabelle) . " (
@@ -718,7 +726,7 @@ class hangoHelper
 			`Buch` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ''
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 		}
-	
+
 		$tabelle = $this->hangomat_liste;
 		if (!in_array($tabelle, $this->tables))
 		{
@@ -745,12 +753,12 @@ class hangoHelper
 			}
 			catch (Exception $e)
 			{
-				JFactory::getApplication()->enqueueMessage(JText::sprintf('HANGOMAT_DB_CREATE_TABLE_ERROR', $key), 'error');
+				Factory::getApplication()->enqueueMessage(Text::sprintf('HANGOMAT_DB_CREATE_TABLE_ERROR', $key), 'error');
 				$this->enqueueError(__LINE__, $e);
 				return false;
 			}
 			$this->tables[] = $key;
-			
+
 			// Newly created db tables don't need an update.
 			$this->needsNoUpdate[] = $key;
 		}
@@ -786,7 +794,7 @@ class hangoHelper
 			(7, 1162903900, 'Sandy J.', 'http://', '', 'TRUPPENUEBUNGSPLATZ', 2),
 			(8, 1163074091, 'Sandy J.', 'http://', '', 'TUCHERHAUS', 3),
 			(9, 1163247057, 'Sandy J.', 'http://', '', 'OBERPFALZ', 2),
-			(10, 1163416206, 'Sandy J.', 'http://', '', 'ALBRECHT VON HOHENFELS', 3);";		
+			(10, 1163416206, 'Sandy J.', 'http://', '', 'ALBRECHT VON HOHENFELS', 3);";
 		}
 
 		if (empty($exists))
@@ -794,7 +802,7 @@ class hangoHelper
 			$tabelle = $this->hangomat_ip;
 			$query = $this->db->getQuery(true)
 			->select($this->db->qn('Ip'))->from($this->db->qn($tabelle));
-			$this->db->setQuery($query, 0, 1);			
+			$this->db->setQuery($query, 0, 1);
 			if ($this->db->loadAssoc())
 			{
 				$exists[] = $tabelle;
@@ -824,7 +832,7 @@ class hangoHelper
 					'M' => 0, 'N' => 0, 'O' => 0, 'P' => 0, 'Q' => 0, 'R' => 0,
 					'S' => 0, 'T' => 0, 'U' => 0, 'V' => 0, 'W' => 0, 'X' => 0,
 					'Y' => 0, 'Z' => 0
-				);		
+				);
 				$characters = $this->db->q(json_encode($characters_));
 				$sql[$tabelle] = "INSERT INTO " . $this->db->qn($tabelle) . " (
 				`Id`, `Buchstaben`, `Wort`, `SWort`, `Last`, `Tag`, `Anzahl`, `LWort`, `characters`) VALUES
@@ -832,7 +840,7 @@ class hangoHelper
 				(468, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'LUFTRAUM', '________', '', '', 0, '', " . $characters . "),
 				(469, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'SCHNAPSIDEE', '___________', '', '', 0, '', " . $characters . "),
 				(470, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'KAMPFJET', '________', '', '', 0, '', " . $characters . ");";
-	
+
 				$characters_['G'] = 1;
 				$characters = $this->db->q(json_encode($characters_));
 				$sql[$tabelle . '_2'] = "INSERT INTO " . $this->db->qn($tabelle) . " (
@@ -840,14 +848,14 @@ class hangoHelper
 				(466, 'ABCDFGHJKLMOPQSUVWXYZ', 'BEFLAGGUNG', '_E______N_', 'N', 'Saturday', 5, 'BABYLEICHT', " . $characters . ");";
 			}
 		}
-		
+
 		if (!empty($exists))
 		{
-			JFactory::getApplication()->enqueueMessage(JText::sprintf('HANGOMAT_DB_NOT_EMPTY_INSERTTESTDATA', implode(', ', $exists)), 'warning');
+			Factory::getApplication()->enqueueMessage(Text::sprintf('HANGOMAT_DB_NOT_EMPTY_INSERTTESTDATA', implode(', ', $exists)), 'warning');
 			// Keine Variable, kein false, da kein Abbruch erfolgen soll, sondern lediglich Warnung.
 			return;
 		}
-		
+
 		foreach ($sql as $key => $query)
 		{
 			$this->db->setQuery($query);
@@ -857,14 +865,14 @@ class hangoHelper
 			}
 			catch (Exception $e)
 			{
-				JFactory::getApplication()->enqueueMessage(JText::sprintf('HANGOMAT_DB_INSERTTESTDATA_ERROR', $key), 'error');
+				Factory::getApplication()->enqueueMessage(Text::sprintf('HANGOMAT_DB_INSERTTESTDATA_ERROR', $key), 'error');
 				$this->enqueueError(__LINE__, $e);
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 	/**
 	 Updates <= release V.2017.07.10.
 	*/
@@ -902,7 +910,7 @@ class hangoHelper
 					$sql[$tabelle . '.' . $column] = 'ALTER TABLE ' . $this->db->qn($tabelle) . ' MODIFY ' . $this->db->qn($column) . ' VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ""';
 				}
 			} // $varChars255 end
-			
+
 			// char(1)
 			if (
 				strtolower($tableColumns['Last']->Type) != 'char(1)'
@@ -910,23 +918,23 @@ class hangoHelper
 			){
 				$sql[$tabelle . '.Last'] = 'ALTER TABLE ' . $this->db->qn($tabelle) . ' MODIFY ' . $this->db->qn('Last') . ' CHAR( 1 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ""';
 			} // char(1) end
-			
+
 			if (!isset($tableColumns['characters']))
 			{
 				$sql[$tabelle . '.characters'] = 'ALTER TABLE ' . $this->db->qn($tabelle) . ' ADD ' . $this->db->qn('characters') . ' VARCHAR( 5120 ) NOT NULL DEFAULT "{}"';
 			}
-			
+
 			if (!isset($tableColumns['state']))
 			{
 				$sql[$tabelle . '.state'] = 'ALTER TABLE ' . $this->db->qn($tabelle) . ' ADD ' . $this->db->qn('state') . ' TINYINT( 3 ) NOT NULL DEFAULT "0"';
 			}
-			
+
 			if (!isset($tableColumns['voted']))
 			{
 				$sql[$tabelle . '.voted'] = 'ALTER TABLE ' . $this->db->qn($tabelle) . ' ADD ' . $this->db->qn('voted') . '  VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ""';
 			}
 		} // if hangomat needsNoUpdate end
-		
+
 		$tabelle = $this->hangomat_liste;
 		if (!in_array($tabelle, $this->needsNoUpdate))
 		{
@@ -941,14 +949,14 @@ class hangoHelper
 					$sql[$tabelle . '.' . $column] = 'ALTER TABLE ' . $this->db->qn($tabelle) . ' MODIFY ' . $this->db->qn($column) . ' VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ""';
 				}
 			} // $varChars255 end
-			
-			
+
+
 			if (!isset($tableColumns['tagwechsel']))
 			{
 				$sql[$tabelle . '.tagwechsel'] = 'ALTER TABLE ' . $this->db->qn($tabelle) . ' ADD ' . $this->db->qn('tagwechsel') . ' INT( 10 ) NOT NULL DEFAULT "0" COMMENT "System Buchstabenauswertung zu Tagwechsel"';
 			}
 		} // if hangomat_liste needsNoUpdate end
-		
+
 		$tabelle = $this->hangomat_ip;
 		if (!in_array($tabelle, $this->needsNoUpdate))
 		{
@@ -968,7 +976,7 @@ class hangoHelper
 				$sql[$tabelle . '.Ip'] = 'ALTER TABLE ' . $this->db->qn($tabelle) . ' MODIFY ' . $this->db->qn('Ip') . ' VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ""';
 			} // varchar(255) end
 		} // if hangomat_ip needsNoUpdate end
-		
+
 		foreach ($sql as $key => $query)
 		{
 			$this->db->setQuery($query);
@@ -978,12 +986,12 @@ class hangoHelper
 			}
 			catch (Exception $e)
 			{
-				JFactory::getApplication()->enqueueMessage(JText::sprintf('HANGOMAT_DB_UPDATE_ERROR', $key), 'error');
+				Factory::getApplication()->enqueueMessage(Text::sprintf('HANGOMAT_DB_UPDATE_ERROR', $key), 'error');
 				$this->enqueueError(__LINE__, $e);
 				return false;
 			}
 		}
-		
+
 		if ($oldTableStructure)
 		{
 			// Update characzters column of current word.
@@ -1018,7 +1026,7 @@ class hangoHelper
 					return false;
 				}
 			} // if $current end
-			
+
 			// Remove old columns.
 			$drop = array(
 				' DROP A', ' DROP B', ' DROP C', ' DROP D', ' DROP E', ' DROP F',
@@ -1028,7 +1036,7 @@ class hangoHelper
 				' DROP Q', ' DROP R', ' DROP S', ' DROP T', ' DROP U', ' DROP V',
 				' DROP W', ' DROP X',
 				' DROP Y', ' DROP Z'
-			);			
+			);
 			$sql = 'ALTER TABLE ' . $this->db->qn($this->hangomat) . implode(', ', $drop);
 			$this->db->setQuery($sql);
 			try
@@ -1044,9 +1052,9 @@ class hangoHelper
 		$this->needsNoUpdate = array($this->hangomat, $this->hangomat_ip, $this->hangomat_liste);
 		return true;
 	}
-	
+
 	/**
-	 
+
 	*/
 	private function getItems()
 	{
@@ -1074,7 +1082,7 @@ class hangoHelper
 		$this->currentItem = $this->shiftFirstArrayItem($this->items);
 		$this->refreshUnicodeArrays();
 	}
-	
+
 	/**
 	 Returns Array.
 	*/
@@ -1093,7 +1101,7 @@ class hangoHelper
 		{
 			$userIp = $_SERVER['HTTP_CLIENT_IP'];
 		}
-		
+
 		if (!empty($_SERVER['HTTP_USER_AGENT']))
 		{
 			$userIp .= '_' . md5($_SERVER['HTTP_USER_AGENT']);
@@ -1102,9 +1110,9 @@ class hangoHelper
 		{
 			$userIp .= '_' . md5($_SERVER['REMOTE_HOST']);
 		}
-		
+
 		$userIp .= '_' . $this->heuteTag;
-		
+
 		$select = $this->db->qn(array('Vote', 'Try', 'Ip', 'Buch'));
 		$query = $this->db->getQuery(true)
 		->select($select)->from($this->db->qn($this->hangomat_ip))
@@ -1135,15 +1143,15 @@ class hangoHelper
 		{
 			$select = $this->db->qn(array(
 				#'Id',
-				'Zeit', 
-				'Name', 
-				#'HP', 
-				#'Mail', 
-				'Wort', 
+				'Zeit',
+				'Name',
+				#'HP',
+				#'Mail',
+				'Wort',
 				'Anzahl',
 				'tagwechsel'
 			));
-	
+
 			$query = $this->db->getQuery(true)
 			->select($select)->from($this->db->qn($this->hangomat_liste))
 			->order($this->db->qn('Zeit') . ' DESC');
@@ -1151,7 +1159,7 @@ class hangoHelper
 			$this->Liste = $this->db->loadAssocList();
 		}
 	}
-	
+
 	/**
 	array_shift but keeps keys of Array.
 	*/
@@ -1164,7 +1172,7 @@ class hangoHelper
 		}
 		return $firstItem;
 	}
-	
+
 	/**
 		Checks for missing letters, e.g. because there are new ones in configuration.
 		After a new currentItem has been created.
@@ -1184,7 +1192,7 @@ class hangoHelper
 				$update = true;
 			}
 		}
-		
+
 		// Check also for missing letters that are in current Wort.
 		foreach ($this->Wort_array  as $key => $value)
 		{
@@ -1195,9 +1203,9 @@ class hangoHelper
 				$update = true;
 			}
 		}
-		
+
 		### At this point $characters contains all possible letters. ###
-		
+
 		// Check also for missing already voted letters in column voted.
 		foreach ($this->SWort_array  as $key => $value)
 		{
@@ -1224,7 +1232,7 @@ class hangoHelper
 			}
 			$update = true;
 		}
-		
+
 		// Is new currentItem.
 		if ($this->currentItem['state'] == -1)
 		{
@@ -1259,13 +1267,13 @@ class hangoHelper
 			->set($this->db->qn('LWort') . ' = ' . $this->db->q($this->currentItem['LWort']))
 			->set($this->db->qn('voted') . ' = ' . $this->db->q(implode('', array_flip($voted))))
 			->where($this->db->qn('Id') . ' = ' . (int) $this->currentItem['Id']);
-			
+
 			if ($this->currentItem['state'] == -1)
 			{
 				$query->set($this->db->qn('state') . ' = 0')
 				->set($this->db->qn('Buchstaben') . ' = ' . $this->db->q(implode('', $Buchstaben)));
 			}
-			
+
 			$this->db->setQuery($query);
 			try
 			{
@@ -1296,7 +1304,7 @@ class hangoHelper
 
 		$Last = $this->currentItem['Last'];
 
-		// Kein einziger Tipp?		
+		// Kein einziger Tipp?
 		if (!max($characters))
 		{
 			$randomCharacter = '';
@@ -1372,7 +1380,7 @@ class hangoHelper
 		return true;
 	}
 
-	
+
 	/**
 	Modus 'normal'.
 	Wie schon immer.
@@ -1385,7 +1393,7 @@ class hangoHelper
 		&$SWort,
 		&$voted,
 		&$Last
-	){	
+	){
 		$update = true;
 		$collector = array();
 		$hmmax = 0;
@@ -1446,7 +1454,7 @@ class hangoHelper
 
 				// Reset.
 				$characters[$key] = 0;
-				
+
 				// Otherwise following array_flip will flop.
 				$voted[$key] = $voted ? (max($voted) + 1) : 0;
 
@@ -1483,7 +1491,7 @@ class hangoHelper
 			$new->Tag = $this->heuteTag;
 			// Marker for new current item for updateCurrentWort().
 			$new->state = -1;
-			
+
 			$ret = $this->db->updateObject($this->hangomat, $new, 'Id');
 			if (!$ret)
 			{
@@ -1495,7 +1503,7 @@ class hangoHelper
 		$this->getCurrentItem(true);
 		return true;
 	}
-	
+
 	private function calculateDays($old)
 	{
 		return floor((strtotime($this->heuteTag) - strtotime($old)) / 86400);
@@ -1505,7 +1513,7 @@ class hangoHelper
 	{
 		return date('Ymd', strtotime($this->heuteTag) - 86400);
 	}
-	
+
 	/**
 	 public!
 	*/
@@ -1534,11 +1542,11 @@ class hangoHelper
 			}
 			else
 			{
-				$this->Wort_array = $this->SWort_array = $this->voted_array = 
+				$this->Wort_array = $this->SWort_array = $this->voted_array =
 				$this->Buchstaben_array = $this->characters_array = array();
 			}
 	}
-	
+
 	/**
 		Admin created a new word.
 		public!
@@ -1548,13 +1556,13 @@ class hangoHelper
 		$SWort = '';
 		$Wort = preg_replace('/\s\s+/', ' ', $hangowort);
 		$parts = mb_split(' ', $Wort);
-		
+
 		foreach ($parts as $key => $part)
 		{
 			$parts[$key] = str_repeat('_', mb_strlen($part));
 		}
 		$SWort = implode(' ', $parts);
-		
+
 		$characters = array();
 		foreach($this->moeglicheBuchstaben_array as $key => $value)
 		{
@@ -1590,23 +1598,23 @@ class hangoHelper
 		}
 		return true;
 	}
-	
+
 	/**
 	 A word has been solved. Add entry in hangomat_liste.
 	*/
 	private function insertListe()
 	{
-		$Mail = JText::_('HANGOMAT_NOT_SPECIFIED');
-		
+		$Mail = Text::_('HANGOMAT_NOT_SPECIFIED');
+
 		// Durch User gelöst (Loesungswort).
 		// Hinweis: User kann Eintrag nach nächstem Seitenladen überschreiben (s. $this->winnerFormShow).
 		if ($this->currentItem['state'] == 2)
 		{
-			$Name = JText::_('HANGOMAT_ANONYMOUS');
+			$Name = Text::_('HANGOMAT_ANONYMOUS');
 		}
 		else
 		{
-			$Name = JText::_('HANGOMAT_NO_WINNER');
+			$Name = Text::_('HANGOMAT_NO_WINNER');
 		}
 
 		$columns = array(
@@ -1641,7 +1649,7 @@ class hangoHelper
 			$this->enqueueError(__LINE__, $e);
 			return false;
 		}
-		
+
 		// Solved by User. Showwinnerform for further user details.
 		if ($this->currentItem['state'] == 2)
 		{
@@ -1650,7 +1658,7 @@ class hangoHelper
 		}
 		return true;
 	}
-	
+
 	/**
 		Bisschen konfus. Lass ich aber erst mal:
 		$Buch, falls falscher EinzelBuchstabe, der Buchstabe (char).
@@ -1670,7 +1678,7 @@ class hangoHelper
 		{
 			$this->db->updateObject($this->hangomat_ip, $user, 'Ip');
 		}
-		
+
 		// Refresh PHP Array.
 		$this->getCurrentUser();
 	}
@@ -1704,7 +1712,7 @@ class hangoHelper
 		}
 		return true;
 	}
-	
+
 	/**
 		Insert winner datas into hangomat_liste.
 	*/
@@ -1721,18 +1729,18 @@ class hangoHelper
 		{
 			$update = true;
 
-			if (!JMailHelper::isEmailAddress($Mail))
+			if (!MailHelper::isEmailAddress($Mail))
 			{
 				$Mail = '';
-				JFactory::getApplication()->enqueueMessage(JText::_('HANGOMAT_INVALID_EMAIL'));
+				Factory::getApplication()->enqueueMessage(Text::_('HANGOMAT_INVALID_EMAIL'));
 			}
 		}
-		
+
 		if (! ($winnerFormInsertid = $this->input->get('winnerFormInsertid', 0, 'INTEGER')))
 		{
 			$update = false;
 		}
-		
+
 		// Other datas already inserted in insertListe().
 		if ($update && ($Name || $Email))
 		{
@@ -1781,7 +1789,7 @@ class hangoHelper
 		}
 		return true;
 	}
-	
+
 	/**
 		Admin deleted a word.
 		Or word has been solved somehow.
@@ -1802,7 +1810,7 @@ class hangoHelper
 			catch (Exception $e)
 			{
 				$this->enqueueError(__LINE__, $e);
-				
+
 				// Nein! Nicht unbedingt nötig. Wichtiger ist löschen unten.
 				#return false;
 			}
@@ -1823,7 +1831,7 @@ class hangoHelper
 		}
 		return true;
 	}
-	
+
 	/**
 	Truncate whole table.
 	$currentIp: delete only row of current user (only admins).
@@ -1853,8 +1861,8 @@ class hangoHelper
 
 		$query->delete($this->db->qn($this->hangomat_ip));
 
-		$this->db->setQuery($query); 
-		
+		$this->db->setQuery($query);
+
 		try
 		{
 			$this->db->execute();
@@ -1871,12 +1879,12 @@ class hangoHelper
 	/**
 		Check if admin is logged in and write into session.
 		public!
-	*/	
+	*/
 	public function getLoggedin()
 	{
-		$session = JFactory::getSession();
+		$session = Factory::getSession();
 		$sessionKey = 'hangomat_hmcook.' . $this->moduleId;
-		$hmcook = trim(JFactory::getApplication()->input->post->get('hmcook', '', 'string'));
+		$hmcook = trim(Factory::getApplication()->input->post->get('hmcook', '', 'string'));
 
 		if (!empty($hmcook) && $hmcook === trim($this->hmconfig->get('adminpass', '')))
 		{
@@ -1888,7 +1896,7 @@ class hangoHelper
 		}
 		return $session->get($sessionKey, null);
 	}
-	
+
 	/**
 	serverType mysql = MySQL, MySQLi, MySQL (PDO)
 	*/
@@ -1896,7 +1904,7 @@ class hangoHelper
 	{
 		if ($this->db->getServerType() != 'mysql')
 		{
-			JFactory::getApplication()->enqueueMessage(JText::sprintf('HANGOMAT_DB_DRIVER_NOT_SUPPORTED', $this->db->getServerType()), 'error');
+			Factory::getApplication()->enqueueMessage(Text::sprintf('HANGOMAT_DB_DRIVER_NOT_SUPPORTED', $this->db->getServerType()), 'error');
 			return false;
 		}
 		return true;
@@ -1933,7 +1941,7 @@ class hangoHelper
 			$retStr = '';
 
 			$str = $this->str_split_unicode($str, $l = 0);
-			
+
 			foreach ($str as $key => $character)
 			{
 				if (mb_strlen($character) !== mb_strlen(mb_strtoupper($character)))
@@ -1956,33 +1964,33 @@ class hangoHelper
 	private function addCSS()
 	{
 		$currentDir = basename(__DIR__);
-		$fileExists = JHtml::_('stylesheet', $currentDir . '/hangomat.css', array('relative' => true, 'pathOnly' => 'true'));
+		$fileExists = HTMLHelper::_('stylesheet', $currentDir . '/hangomat.css', array('relative' => true, 'pathOnly' => 'true'));
 
 		if ($fileExists)
 		{
-			JHtml::_('stylesheet', $currentDir . '/hangomat.css', array('version' => 'auto', 'relative' => true));
+			HTMLHelper::_('stylesheet', $currentDir . '/hangomat.css', array('version' => 'auto', 'relative' => true));
 		}
 		else
 		{
-			JFactory::getDocument()->addStyleDeclaration($this->getCSS());
+			Factory::getDocument()->addStyleDeclaration($this->getCSS());
 		}
 	}
-	
+
 	private function addJS()
 	{
 		$currentDir = basename(__DIR__);
-		$fileExists = JHtml::_('script', $currentDir . '/hangomat.js', array('relative' => true, 'pathOnly' => 'true'));
+		$fileExists = HTMLHelper::_('script', $currentDir . '/hangomat.js', array('relative' => true, 'pathOnly' => 'true'));
 
 		if ($fileExists)
 		{
-			JHtml::_('stylesheet', $currentDir . '/hangomat.js', array('version' => 'auto', 'relative' => true));
+			HTMLHelper::_('stylesheet', $currentDir . '/hangomat.js', array('version' => 'auto', 'relative' => true));
 		}
 		else
 		{
-			JFactory::getDocument()->addScriptDeclaration($this->getJS());
+			Factory::getDocument()->addScriptDeclaration($this->getJS());
 		}
 	}
-	
+
 	private function getCSS()
 	{
 		return '
@@ -2059,7 +2067,7 @@ span.span4letter{
 
 		';
 	}
-	
+
 	private function getJS()
 	{
 		$js = '/* START Hangomat JS */';
@@ -2104,9 +2112,9 @@ span.span4letter{
 			$js .= '/* END Hangomat JS */';
 			return $js;
 	}
-	
+
 	private function enqueueError($line, $e)
 	{
-		JFactory::getApplication()->enqueueMessage('Hangomat: Zeile ' . $line . ': ' . JText::sprintf('JLIB_DATABASE_ERROR_FUNCTION_FAILED', $e->getCode(), $e->getMessage()), 'error');
+		Factory::getApplication()->enqueueMessage('Hangomat: Zeile ' . $line . ': ' . Text::sprintf('JLIB_DATABASE_ERROR_FUNCTION_FAILED', $e->getCode(), $e->getMessage()), 'error');
 	}
 }
